@@ -130,25 +130,36 @@ Override ->
 Show time in minutes.
 Count down when shower in progress
 Flash the dot on one to show system is live, or flash the green/red LED?
+
+```
      _  _
     |_||_|
     |_||_|
-
+```
 
 At 1 minute:
+
+```
      _  _     _  _     _  _     _  _     _  _     _  _ 
     |   _|   |  | |   | |  |   |_   |   |    |   |    |
     |_  _|   |_  _|   |_  _|   |_  _|   |_| _|   |_ |_|
+```
 
 Then
+ 
+```
      _  _     _  _     _  _     _  _     _  _     _  _ 
     |   _|   |  | |   | |  |   |_   |   |    |   |    |
     |_  _    |_  _    |_  _    |_  _    |_| _    |_ |_ 
+```
 
 Etc., with 6 spoke windmill in the middle doing the seconds, and the outer ring counting down thusly:
+
+```
      _  _     _  _     _  _     _                       
     |    |   |    |   |        |        |               
     |_  _|   |_  _    |_  _    |_  _    |_  _    |_  _    _  _       _ 
+```
 
 8 outer steps x 6 inner = 48 steps
 Maybe...
