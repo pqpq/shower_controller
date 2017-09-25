@@ -4,7 +4,9 @@ Arduino based timer controller for domestic electric shower
 ## Ideas
 Multiplex the 7-seg onto the same 7 DIO lines. Enable each in turn, 50% duty cycle. 
 7 lines for data, 1 for select, 2 for other LEDs = 10 
+
 or... 
+
 2 for binary select, with 4 destinations for 7 data: 2 7seg, 2 LEDs, lots spare = 9 but more HW to demux. Probably unnecessary
 
 “Front panel” behind smoked perspex, 15x15 so it can be tiled into the shower enclosure
@@ -174,6 +176,7 @@ Just switch over to displaying seconds for last minute? Not so much fun though!
 
 ## Links
 Valve: http://www.solenoid-valve.world/by-industry/water-industry/115BC-RPE-solenoid-valve
+
 Current sense: https://www.proto-pic.co.uk/acs712-breakout.html
 
 
