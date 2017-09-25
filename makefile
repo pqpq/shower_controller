@@ -1,5 +1,5 @@
 #HEADERS = program.h headers.h
-FLAGS = -std=c++11 -wall -werror
+FLAGS = -std=c++11 -Wall -Werror
 
 default: all
 
