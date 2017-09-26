@@ -11,19 +11,19 @@ class TestActions : public Actions
 public:
     TestActions() { reset(); }
 
-    virtual void valveClosed() { valveClosedCalls++; }
-    virtual void valveOpen() { valveOpenCalls++; }
+    virtual void valveClosed()      { totalCalls++; valveClosedCalls++; }
+    virtual void valveOpen()        { totalCalls++; valveOpenCalls++; }
 
-    virtual void greenLedOn() { greenLedOnCalls++; }
+    virtual void greenLedOn()       { totalCalls++; greenLedOnCalls++; }
 
-    virtual void showShowerTime() { showShowerTimeCalls++; }
-    virtual void displayDim() { displayDimCalls++; }
-    virtual void displayBright() { displayBrightCalls++; }
+    virtual void showShowerTime()   { totalCalls++; showShowerTimeCalls++; }
+    virtual void displayDim()       { totalCalls++; displayDimCalls++; }
+    virtual void displayBright()    { totalCalls++; displayBrightCalls++; }
 
-    virtual void shortBeep() { shortBeepCalls++; }
-    virtual void longBeep() { longBeepCalls++; }
+    virtual void shortBeep()        { totalCalls++; shortBeepCalls++; }
+    virtual void longBeep()         { totalCalls++; longBeepCalls++; }
 
-    virtual void startColdTimer() { startColdTimerCalls++; }
+    virtual void startColdTimer()   { totalCalls++; startColdTimerCalls++; }
 
 
     void reset()
@@ -41,6 +41,8 @@ public:
         longBeepCalls = 0;
 
         startColdTimerCalls = 0;
+
+        totalCalls = 0;
     }
 
     size_t valveClosedCalls;
@@ -56,6 +58,8 @@ public:
     size_t longBeepCalls;
 
     size_t startColdTimerCalls;
+
+    size_t totalCalls;
 };
 
 
@@ -70,8 +74,7 @@ TEST_CASE("Can create an instance")
     REQUIRE(ta.showShowerTimeCalls == 1);
     REQUIRE(ta.displayDimCalls == 1);
     REQUIRE(ta.shortBeepCalls == 1);
-
-    /// @todo test all other calls == 0
+    CHECK(ta.totalCalls == 5);
 }
 
 
@@ -89,7 +92,5 @@ TEST_CASE("Start causes various actions")
     REQUIRE(ta.displayBrightCalls == 1);
     REQUIRE(ta.longBeepCalls == 1);
     REQUIRE(ta.startColdTimerCalls == 1);
-
-    /// @todo test all other calls == 0
-
+    CHECK(ta.totalCalls == 6);
 }
