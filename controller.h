@@ -9,7 +9,7 @@ public:
     Controller(Actions& a) : actions(a) { idle(); }
 
     // Events
-    void start() override final {}
+    void start() override final { waterOn(); }
 
 private:
 
@@ -22,6 +22,16 @@ private:
         actions.shortBeep();
         actions.showShowerTime();
         actions.displayDim();
+    }
+
+    void waterOn()
+    {
+        actions.greenLedOn();
+        actions.longBeep();
+        actions.showShowerTime();
+        actions.displayBright();
+        actions.startColdTimer();
+        actions.valveOpen();
     }
 };
 
