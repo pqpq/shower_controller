@@ -9,14 +9,28 @@ public:
     Controller(Actions& a) : actions(a) { idle(); }
 
     // Events
-    void start() override final { waterOn(); }
+    void start() override final
+    {
+        if (state == state_idle)
+        {
+            waterOn();
+        }
+    }
 
 private:
 
+    enum State
+    {
+        state_idle,
+        state_waterOn
+    };
+
     Actions& actions;
+    State state;
 
     void idle()
     {
+        state = state_idle;
         actions.greenLedOn();
         actions.valveClosed();
         actions.shortBeep();
@@ -26,6 +40,7 @@ private:
 
     void waterOn()
     {
+        state = state_waterOn;
         actions.greenLedOn();
         actions.longBeep();
         actions.showShowerTime();
