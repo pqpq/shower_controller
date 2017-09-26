@@ -27,7 +27,6 @@ Raise tone of beep as the last minute expires?!
 
 Use PWM to generate tones, so we can free up DIO and/or CPU cycles? If not, tone library exists.
 
-**DAMMIT! Need button to initiate a shower. Otherwise valve has to be NO, and this won’t work.**
 
 ## Hardware
 ### Interface to existing shower
@@ -40,6 +39,9 @@ When plumbed in, have a bypass valve in case it fails.
 Make sure power comes from fuse box side of shower switch. Otherwise unit can be reset by turning off shower. Shower MCB will still protect the unit.
 
 ### User facing
+
+Waterproof momentary push button to initiate a shower.
+
 5v Piezo buzzer for alerting user
 
 2x7 segment display to display minutes, and show last minute count down somehow
@@ -59,10 +61,12 @@ _Old ideas:_
 * _Push to hold button while changing time, or push once after changing time?_
 * _Reed switch so you can’t just change the time willy-nilly?_
 
-Duplicate 7-seg to show time when programming? Only comes on when programming key enabled? Power via link in programming key?
+Duplicate 7-seg to show time when programming? Only comes on when programming key enabled? Power it via a link in programming key?
+
 ### Other
 USB power supply for 5v?
 Solid state relay to control the water valve?
+
 ### Pin usage
 Arduino Uno:
 EEPROM (remember setting)
@@ -70,29 +74,43 @@ EEPROM (remember setting)
 6 A/D in
 
 LEDs: 
-* 10: 7seg + 1select (L not R) + 1 red + 1 green
-* 9: 7seg + 2 mux select
-Security: 1
-Program: 2, or 3 (one toggle between shower time and lockout time?)
-Hall sensor: 1 analogue
+* 10 out: 7seg + 1select (L not R) + 1 red + 1 green
+* 9 out: 7seg + 2 mux select
+Start button: 1 (in)
+Security: 1 (in) 
+Program: 2, or 3 (one toggle between shower time and lockout time?) (in)
+Hall sensor: 1 analogue in
 Reed relay (override): 1 adc or 1 digital in
-Shower valve actuate: 1
+Shower valve actuate: 1 out
+Buzzer: 1 PWM out
+
+**Total: 12 out, 5 or 6 Digital in, 1 Analogue in**
 
 ## “UI”
-### Questions
-Allow 1 minute before turning on timer? Might be nice for cleaning, etc. Show counter or something while this is happening? Or will this be covered by sensing its not using the heater, and therefore not starting the timer in the first place?
 
 ### Flow
 Power on -> Idle
 Idle:
 * Solid green LED
-* Water valve open
+* Water valve closed
 * Show time, dim
+* beep
 
-Detect shower current -> 
+Press button -> 
+* water valve open
+* beep (long?)
+* Display initial time in mins
+* display bright
+* start "cold" timer
+* Solid green LED
+
+Cold timer expires -> idle
+
+Detect shower current
+* stop "cold" timer
 * start timer
 * flashing green LED
-* Display initial time in mins
+* beep
 
 Shower running ->
 * Count down time in mins
@@ -117,7 +135,6 @@ Lockout ->
 * Count down lockout in mins
 
 Lockout complete -> Idle 
-* **AAARGH! Valve opens again at this point!**
 
 Dongle in -> Override
 
