@@ -1,4 +1,4 @@
-#HEADERS = program.h headers.h
+HEADERS = controller.h actions.h
 FLAGS = -Wall -Werror
 
 default: all
