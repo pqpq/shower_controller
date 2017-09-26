@@ -1,5 +1,5 @@
-HEADERS = controller.h actions.h
-FLAGS = -Wall -Werror
+HEADERS = controller.h actions.h events.h
+FLAGS = -std=c++11 -Wall -Werror
 
 default: all
 

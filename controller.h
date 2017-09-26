@@ -1,11 +1,15 @@
 #pragma once
 
 #include "actions.h"
+#include "events.h"
 
-class Controller
+class Controller : public Events
 {
 public:
     Controller(Actions& a) : actions(a) { idle(); }
+
+    // Events
+    void start() override final {}
 
 private:
 
