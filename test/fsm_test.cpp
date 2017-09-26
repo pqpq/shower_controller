@@ -78,7 +78,7 @@ TEST_CASE("Can create an instance")
 }
 
 
-TEST_CASE("Start causes various actions")
+TEST_CASE("Start causes various actions from idle")
 {
     TestActions ta;
     Controller uut(ta);
@@ -93,4 +93,18 @@ TEST_CASE("Start causes various actions")
     REQUIRE(ta.longBeepCalls == 1);
     REQUIRE(ta.startColdTimerCalls == 1);
     CHECK(ta.totalCalls == 6);
+}
+
+TEST_CASE("Start causes no actions from water on")
+{
+    TestActions ta;
+    Controller uut(ta);
+
+    // get to 'water on' state
+    uut.start();
+    ta.reset();
+
+    // test
+    uut.start();
+    CHECK(ta.totalCalls == 0);
 }
