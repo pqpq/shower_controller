@@ -9,6 +9,7 @@ public:
     virtual void valveOpen() = 0;
 
     virtual void greenLedOn() = 0;
+    virtual void greenLedFlashing() = 0;
 
     virtual void showShowerTime() = 0;
     virtual void displayDim() = 0;
@@ -18,4 +19,6 @@ public:
     virtual void longBeep() = 0;
 
     virtual void startColdTimer() = 0;
+    virtual void stopColdTimer() = 0;
+    virtual void startShowerTimer() = 0;
 };

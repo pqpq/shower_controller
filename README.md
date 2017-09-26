@@ -96,7 +96,7 @@ Idle:
 * Show time, dim
 * beep
 
-Press button -> 
+Press button -> Water On
 * water valve open
 * beep (long?)
 * Display initial time in mins
@@ -106,7 +106,7 @@ Press button ->
 
 Cold timer expires -> idle
 
-Detect shower current
+Detect shower current -> Shower running
 * stop "cold" timer
 * start timer
 * flashing green LED

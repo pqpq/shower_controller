@@ -17,12 +17,30 @@ public:
         }
     }
 
+    void coldTimerExpired() override final
+    {
+        if (state != state_idle)
+        {
+            idle();
+        }
+    }
+
+    void showerHot() override final
+    {
+        if (state == state_waterOn)
+        {
+            showerRunning();
+        }
+    }
+
+
 private:
 
     enum State
     {
         state_idle,
-        state_waterOn
+        state_waterOn,
+        state_showerRunning,
     };
 
     Actions& actions;
@@ -47,6 +65,15 @@ private:
         actions.displayBright();
         actions.startColdTimer();
         actions.valveOpen();
+    }
+
+    void showerRunning()
+    {
+        state = state_showerRunning;
+        actions.stopColdTimer();
+        actions.startShowerTimer();
+        actions.greenLedFlashing();
+        actions.longBeep();
     }
 };
 

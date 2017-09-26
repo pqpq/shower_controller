@@ -15,6 +15,7 @@ public:
     virtual void valveOpen()        { totalCalls++; valveOpenCalls++; }
 
     virtual void greenLedOn()       { totalCalls++; greenLedOnCalls++; }
+    virtual void greenLedFlashing() { totalCalls++; greenLedFlashingCalls++; }
 
     virtual void showShowerTime()   { totalCalls++; showShowerTimeCalls++; }
     virtual void displayDim()       { totalCalls++; displayDimCalls++; }
@@ -24,7 +25,8 @@ public:
     virtual void longBeep()         { totalCalls++; longBeepCalls++; }
 
     virtual void startColdTimer()   { totalCalls++; startColdTimerCalls++; }
-
+    virtual void stopColdTimer()    { totalCalls++; stopColdTimerCalls++; }
+    virtual void startShowerTimer() { totalCalls++; startShowerTimerCalls++; }
 
     void reset()
     {
@@ -32,6 +34,7 @@ public:
         valveOpenCalls = 0;
 
         greenLedOnCalls = 0;
+        greenLedFlashingCalls = 0;
 
         showShowerTimeCalls = 0;
         displayDimCalls = 0;
@@ -41,6 +44,8 @@ public:
         longBeepCalls = 0;
 
         startColdTimerCalls = 0;
+        stopColdTimerCalls = 0;
+        startShowerTimerCalls = 0;
 
         totalCalls = 0;
     }
@@ -49,6 +54,7 @@ public:
     size_t valveOpenCalls;
 
     size_t greenLedOnCalls;
+    size_t greenLedFlashingCalls;
 
     size_t showShowerTimeCalls;
     size_t displayDimCalls;
@@ -58,6 +64,8 @@ public:
     size_t longBeepCalls;
 
     size_t startColdTimerCalls;
+    size_t stopColdTimerCalls;
+    size_t startShowerTimerCalls;
 
     size_t totalCalls;
 };
@@ -104,7 +112,56 @@ TEST_CASE("Start causes no actions from water on")
     uut.start();
     ta.reset();
 
-    // test
     uut.start();
     CHECK(ta.totalCalls == 0);
+}
+
+
+TEST_CASE("Cold timer expired in idle -> no actions")
+{
+    TestActions ta;
+    Controller uut(ta);
+    ta.reset();
+
+    uut.coldTimerExpired();
+
+    CHECK(ta.totalCalls == 0);
+}
+
+TEST_CASE("Cold timer expired in water on -> idle")
+{
+    TestActions ta;
+    Controller uut(ta);
+
+    // get to 'water on' state
+    uut.start();
+    ta.reset();
+
+    uut.coldTimerExpired();
+
+    REQUIRE(ta.greenLedOnCalls == 1);
+    REQUIRE(ta.valveClosedCalls == 1);
+    REQUIRE(ta.showShowerTimeCalls == 1);
+    REQUIRE(ta.displayDimCalls == 1);
+    REQUIRE(ta.shortBeepCalls == 1);
+    CHECK(ta.totalCalls == 5);
+}
+
+
+TEST_CASE("Shower hot in water on -> shower running")
+{
+    TestActions ta;
+    Controller uut(ta);
+
+    // get to 'water on' state
+    uut.start();
+    ta.reset();
+
+    uut.showerHot();
+
+    REQUIRE(ta.stopColdTimerCalls == 1);
+    REQUIRE(ta.startShowerTimerCalls == 1);
+    REQUIRE(ta.greenLedFlashingCalls == 1);
+    REQUIRE(ta.longBeepCalls == 1);
+    CHECK(ta.totalCalls == 4);
 }
