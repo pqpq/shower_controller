@@ -4,70 +4,48 @@
 #include "../controller.h"
 
 #define CATCH_CONFIG_MAIN
+#define CATCH_CONFIG_COLOUR_NONE
 #include "catch.hpp"
+
+#include <vector>
+#include <string>
 
 class TestActions : public Actions
 {
 public:
     TestActions() { reset(); }
 
-    virtual void valveClosed()      { totalCalls++; valveClosedCalls++; }
-    virtual void valveOpen()        { totalCalls++; valveOpenCalls++; }
+    virtual void valveClosed()      { calls.push_back("valveClosed"); }
+    virtual void valveOpen()        { calls.push_back("valveOpen"); }
 
-    virtual void greenLedOn()       { totalCalls++; greenLedOnCalls++; }
-    virtual void greenLedFlashing() { totalCalls++; greenLedFlashingCalls++; }
+    virtual void greenLedOn()       { calls.push_back("greenLedOn"); }
+    virtual void greenLedFlashing() { calls.push_back("greenLedFlashing"); }
 
-    virtual void showShowerTime()   { totalCalls++; showShowerTimeCalls++; }
-    virtual void displayDim()       { totalCalls++; displayDimCalls++; }
-    virtual void displayBright()    { totalCalls++; displayBrightCalls++; }
+    virtual void showShowerTime()   { calls.push_back("showShowerTime"); }
+    virtual void displayDim()       { calls.push_back("displayDim"); }
+    virtual void displayBright()    { calls.push_back("displayBright"); }
 
-    virtual void shortBeep()        { totalCalls++; shortBeepCalls++; }
-    virtual void longBeep()         { totalCalls++; longBeepCalls++; }
+    virtual void shortBeep()        { calls.push_back("shortBeep"); }
+    virtual void longBeep()         { calls.push_back("longBeep"); }
 
-    virtual void startColdTimer()   { totalCalls++; startColdTimerCalls++; }
-    virtual void stopColdTimer()    { totalCalls++; stopColdTimerCalls++; }
-    virtual void startShowerTimer() { totalCalls++; startShowerTimerCalls++; }
+    virtual void startColdTimer()   { calls.push_back("startColdTimer"); }
+    virtual void stopColdTimer()    { calls.push_back("stopColdTimer"); }
+    virtual void startShowerTimer() { calls.push_back("startShowerTimer"); }
 
     void reset()
     {
-        valveClosedCalls = 0;
-        valveOpenCalls = 0;
-
-        greenLedOnCalls = 0;
-        greenLedFlashingCalls = 0;
-
-        showShowerTimeCalls = 0;
-        displayDimCalls = 0;
-        displayBrightCalls = 0;
-
-        shortBeepCalls = 0;
-        longBeepCalls = 0;
-
-        startColdTimerCalls = 0;
-        stopColdTimerCalls = 0;
-        startShowerTimerCalls = 0;
-
-        totalCalls = 0;
+        calls.clear();
     }
 
-    size_t valveClosedCalls;
-    size_t valveOpenCalls;
+    size_t n(const char* fn) const
+    {
+        return std::count(calls.begin(), calls.end(), fn);
+    }
 
-    size_t greenLedOnCalls;
-    size_t greenLedFlashingCalls;
+    size_t totalCalls() const { return calls.size(); }
 
-    size_t showShowerTimeCalls;
-    size_t displayDimCalls;
-    size_t displayBrightCalls;
-
-    size_t shortBeepCalls;
-    size_t longBeepCalls;
-
-    size_t startColdTimerCalls;
-    size_t stopColdTimerCalls;
-    size_t startShowerTimerCalls;
-
-    size_t totalCalls;
+private:
+    std::vector<std::string> calls;
 };
 
 
@@ -77,14 +55,13 @@ TEST_CASE("Can create an instance")
     TestActions ta;
     const Controller uut(ta);
 
-    REQUIRE(ta.greenLedOnCalls == 1);
-    REQUIRE(ta.valveClosedCalls == 1);
-    REQUIRE(ta.showShowerTimeCalls == 1);
-    REQUIRE(ta.displayDimCalls == 1);
-    REQUIRE(ta.shortBeepCalls == 1);
-    CHECK(ta.totalCalls == 5);
+    REQUIRE(ta.n("greenLedOn") == 1);
+    REQUIRE(ta.n("valveClosed") == 1);
+    REQUIRE(ta.n("showShowerTime") == 1);
+    REQUIRE(ta.n("displayDim") == 1);
+    REQUIRE(ta.n("shortBeep") == 1);
+    CHECK(ta.totalCalls() == 5);
 }
-
 
 TEST_CASE("Start causes various actions from idle")
 {
@@ -94,13 +71,13 @@ TEST_CASE("Start causes various actions from idle")
 
     uut.start();
 
-    REQUIRE(ta.greenLedOnCalls == 1);
-    REQUIRE(ta.valveOpenCalls == 1);
-    REQUIRE(ta.showShowerTimeCalls == 1);
-    REQUIRE(ta.displayBrightCalls == 1);
-    REQUIRE(ta.longBeepCalls == 1);
-    REQUIRE(ta.startColdTimerCalls == 1);
-    CHECK(ta.totalCalls == 6);
+    REQUIRE(ta.n("greenLedOn") == 1);
+    REQUIRE(ta.n("valveOpen") == 1);
+    REQUIRE(ta.n("showShowerTime") == 1);
+    REQUIRE(ta.n("displayBright") == 1);
+    REQUIRE(ta.n("longBeep") == 1);
+    REQUIRE(ta.n("startColdTimer") == 1);
+    CHECK(ta.totalCalls() == 6);
 }
 
 TEST_CASE("Start causes no actions from water on")
@@ -113,9 +90,8 @@ TEST_CASE("Start causes no actions from water on")
     ta.reset();
 
     uut.start();
-    CHECK(ta.totalCalls == 0);
+    CHECK(ta.totalCalls() == 0);
 }
-
 
 TEST_CASE("Cold timer expired in idle -> no actions")
 {
@@ -125,7 +101,7 @@ TEST_CASE("Cold timer expired in idle -> no actions")
 
     uut.coldTimerExpired();
 
-    CHECK(ta.totalCalls == 0);
+    CHECK(ta.totalCalls() == 0);
 }
 
 TEST_CASE("Cold timer expired in water on -> idle")
@@ -139,14 +115,13 @@ TEST_CASE("Cold timer expired in water on -> idle")
 
     uut.coldTimerExpired();
 
-    REQUIRE(ta.greenLedOnCalls == 1);
-    REQUIRE(ta.valveClosedCalls == 1);
-    REQUIRE(ta.showShowerTimeCalls == 1);
-    REQUIRE(ta.displayDimCalls == 1);
-    REQUIRE(ta.shortBeepCalls == 1);
-    CHECK(ta.totalCalls == 5);
+    REQUIRE(ta.n("greenLedOn") == 1);
+    REQUIRE(ta.n("valveClosed") == 1);
+    REQUIRE(ta.n("showShowerTime") == 1);
+    REQUIRE(ta.n("displayDim") == 1);
+    REQUIRE(ta.n("shortBeep") == 1);
+    CHECK(ta.totalCalls() == 5);
 }
-
 
 TEST_CASE("Shower hot in water on -> shower running")
 {
@@ -159,9 +134,9 @@ TEST_CASE("Shower hot in water on -> shower running")
 
     uut.showerHot();
 
-    REQUIRE(ta.stopColdTimerCalls == 1);
-    REQUIRE(ta.startShowerTimerCalls == 1);
-    REQUIRE(ta.greenLedFlashingCalls == 1);
-    REQUIRE(ta.longBeepCalls == 1);
-    CHECK(ta.totalCalls == 4);
+    REQUIRE(ta.n("stopColdTimer") == 1);
+    REQUIRE(ta.n("startShowerTimer") == 1);
+    REQUIRE(ta.n("greenLedFlashing") == 1);
+    REQUIRE(ta.n("longBeep") == 1);
+    CHECK(ta.totalCalls() == 4);
 }
