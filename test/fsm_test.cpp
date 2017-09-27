@@ -10,42 +10,47 @@
 #include <vector>
 #include <string>
 
+using namespace std;
+
+
 class TestActions : public Actions
 {
 public:
     TestActions() { reset(); }
 
-    virtual void valveClosed()      { calls.push_back("valveClosed"); }
-    virtual void valveOpen()        { calls.push_back("valveOpen"); }
+    virtual void valveClosed()      { _calls.push_back("valveClosed"); }
+    virtual void valveOpen()        { _calls.push_back("valveOpen"); }
 
-    virtual void greenLedOn()       { calls.push_back("greenLedOn"); }
-    virtual void greenLedFlashing() { calls.push_back("greenLedFlashing"); }
+    virtual void greenLedOn()       { _calls.push_back("greenLedOn"); }
+    virtual void greenLedFlashing() { _calls.push_back("greenLedFlashing"); }
 
-    virtual void showShowerTime()   { calls.push_back("showShowerTime"); }
-    virtual void displayDim()       { calls.push_back("displayDim"); }
-    virtual void displayBright()    { calls.push_back("displayBright"); }
+    virtual void showShowerTime()   { _calls.push_back("showShowerTime"); }
+    virtual void displayDim()       { _calls.push_back("displayDim"); }
+    virtual void displayBright()    { _calls.push_back("displayBright"); }
 
-    virtual void shortBeep()        { calls.push_back("shortBeep"); }
-    virtual void longBeep()         { calls.push_back("longBeep"); }
+    virtual void shortBeep()        { _calls.push_back("shortBeep"); }
+    virtual void longBeep()         { _calls.push_back("longBeep"); }
 
-    virtual void startColdTimer()   { calls.push_back("startColdTimer"); }
-    virtual void stopColdTimer()    { calls.push_back("stopColdTimer"); }
-    virtual void startShowerTimer() { calls.push_back("startShowerTimer"); }
+    virtual void startColdTimer()   { _calls.push_back("startColdTimer"); }
+    virtual void stopColdTimer()    { _calls.push_back("stopColdTimer"); }
+    virtual void startShowerTimer() { _calls.push_back("startShowerTimer"); }
 
     void reset()
     {
-        calls.clear();
+        _calls.clear();
     }
 
     size_t n(const char* fn) const
     {
-        return std::count(calls.begin(), calls.end(), fn);
+        return count(_calls.begin(), _calls.end(), fn);
     }
 
-    size_t totalCalls() const { return calls.size(); }
+    size_t totalCalls() const { return _calls.size(); }
+
+    const vector<string>& calls() const { return _calls; }
 
 private:
-    std::vector<std::string> calls;
+    vector<string> _calls;
 };
 
 
@@ -139,4 +144,69 @@ TEST_CASE("Shower hot in water on -> shower running")
     REQUIRE(ta.n("greenLedFlashing") == 1);
     REQUIRE(ta.n("longBeep") == 1);
     CHECK(ta.totalCalls() == 4);
+}
+
+struct TestVector
+{
+    std::string testName;
+    std::vector<std::string> eventsToGetToTestState;
+    std::string eventToApply;
+    std::vector<std::string> expectedActions;
+};
+
+void apply(Controller& uut, std::string event)
+{
+    if (event == "start")               uut.start();
+    if (event == "coldTimerExpired")    uut.coldTimerExpired();
+    if (event == "showerHot")           uut.showerHot();
+}
+
+void apply(const TestVector& v)
+{
+    TestActions ta;
+    Controller uut(ta);
+
+    for (const auto& e : v.eventsToGetToTestState)
+    {
+        apply(uut, e);
+    }
+    ta.reset();
+
+    apply(uut, v.eventToApply);
+
+    REQUIRE(ta.calls() == v.expectedActions);
+}
+
+
+const TestVector table[] =
+{
+    {
+        "Init (Idle) + Start -> Water On",
+        { },
+        "start",
+        { "greenLedOn", "longBeep", "showShowerTime", "displayBright", "startColdTimer", "valveOpen" }
+    },
+    {
+        "Init (Idle) + Cold timer expired -> no effect",
+        { },
+        "coldTimerExpired",
+        { "poo" }
+    },
+    {
+        "Init (Idle) + Shower hot -> no effect",
+        { },
+        "showerHot",
+        { }
+    },
+};
+
+TEST_CASE("Table driven FSM test")
+{
+    for (const auto& v : table)
+    {
+        SECTION(v.testName)
+        {
+            apply(v);
+        }
+    }
 }
