@@ -33,6 +33,14 @@ public:
         }
     }
 
+    virtual void fiveMinutesToGo() {}
+    virtual void oneMinuteToGo() {}
+    virtual void fiveSecondsPassed() {}
+    virtual void tenSecondsToGo() {}
+    virtual void showerTimerExpired() {}
+    virtual void dongleIn() {}
+    virtual void dongleOut() {}
+    virtual void blah() {}
 
 private:
 

@@ -18,26 +18,26 @@ class TestActions : public Actions
 public:
     TestActions() { reset(); }
 
-    virtual void valveClosed() { _calls.push_back("valveClosed"); }
-    virtual void valveOpen() { _calls.push_back("valveOpen"); }
+    virtual void valveClosed()      { _calls.push_back("valveClosed"); }
+    virtual void valveOpen()        { _calls.push_back("valveOpen"); }
 
-    virtual void greenLedOn() { _calls.push_back("greenLedOn"); }
-    virtual void greenLedOff() { _calls.push_back("greenLedOff"); }
+    virtual void greenLedOn()       { _calls.push_back("greenLedOn"); }
+    virtual void greenLedOff()      { _calls.push_back("greenLedOff"); }
     virtual void greenLedFlashing() { _calls.push_back("greenLedFlashing"); }
-    virtual void redLedFlashing() { _calls.push_back("redLedFlashing"); }
+    virtual void redLedFlashing()   { _calls.push_back("redLedFlashing"); }
 
-    virtual void showShowerTime() { _calls.push_back("showShowerTime"); }
-    virtual void countDownTime() { _calls.push_back("countDownTime"); }
+    virtual void showShowerTime()   { _calls.push_back("showShowerTime"); }
+    virtual void countDownTime()    { _calls.push_back("countDownTime"); }
     virtual void countDownLockout() { _calls.push_back("countDownLockout"); }
-    virtual void displayDim() { _calls.push_back("displayDim"); }
-    virtual void displayBright() { _calls.push_back("displayBright"); }
+    virtual void displayDim()       { _calls.push_back("displayDim"); }
+    virtual void displayBright()    { _calls.push_back("displayBright"); }
 
-    virtual void shortBeep() { _calls.push_back("shortBeep"); }
-    virtual void longBeep() { _calls.push_back("longBeep"); }
-    virtual void rapidBeep() { _calls.push_back("rapidBeep"); }
+    virtual void shortBeep()        { _calls.push_back("shortBeep"); }
+    virtual void longBeep()         { _calls.push_back("longBeep"); }
+    virtual void rapidBeep()        { _calls.push_back("rapidBeep"); }
 
-    virtual void coldTimerStart() { _calls.push_back("coldTimerStart"); }
-    virtual void coldTimerStop() { _calls.push_back("coldTimerStop"); }
+    virtual void coldTimerStart()   { _calls.push_back("coldTimerStart"); }
+    virtual void coldTimerStop()    { _calls.push_back("coldTimerStop"); }
     virtual void showerTimerStart() { _calls.push_back("showerTimerStart"); }
 
     void reset()
