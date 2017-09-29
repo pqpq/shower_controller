@@ -1,5 +1,10 @@
 # shower_controller
-Arduino based timer controller for domestic electric shower
+An Arduino based timer controller for a domestic electric shower.
+
+## Why
+Our eldest son is suffering from OCD and likes to spend a *long* time in the shower as part of his calming down process. This means we have to police his shower usage, whatever the time of day or night, to make sure he doesn't shower for too long. "Too long" can be an hour or more, if nobody is paying attention. Sometimes he is only ready for a shower at midnight. Or at 10am after everyone has left the house.
+
+So we need an automatic system that can limit shower time, lock out the shower after, but do all this kindly, so the user can see time passing and is not surprised when the shower switches off.
 
 ## Ideas
 Multiplex the 7-seg onto the same 7 DIO lines. Enable each in turn, 50% duty cycle. 
