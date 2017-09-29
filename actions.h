@@ -18,7 +18,7 @@ public:
     virtual void shortBeep() = 0;
     virtual void longBeep() = 0;
 
-    virtual void startColdTimer() = 0;
-    virtual void stopColdTimer() = 0;
-    virtual void startShowerTimer() = 0;
+    virtual void coldTimerStart() = 0;
+    virtual void coldTimerStop() = 0;
+    virtual void showerTimerStart() = 0;
 };

@@ -31,9 +31,9 @@ public:
     virtual void shortBeep()        { _calls.push_back("shortBeep"); }
     virtual void longBeep()         { _calls.push_back("longBeep"); }
 
-    virtual void startColdTimer()   { _calls.push_back("startColdTimer"); }
-    virtual void stopColdTimer()    { _calls.push_back("stopColdTimer"); }
-    virtual void startShowerTimer() { _calls.push_back("startShowerTimer"); }
+    virtual void coldTimerStart()   { _calls.push_back("coldTimerStart"); }
+    virtual void coldTimerStop()    { _calls.push_back("coldTimerStop"); }
+    virtual void showerTimerStart() { _calls.push_back("showerTimerStart"); }
 
     void reset()
     {
@@ -81,7 +81,7 @@ TEST_CASE("Start causes various actions from idle")
     REQUIRE(ta.n("showShowerTime") == 1);
     REQUIRE(ta.n("displayBright") == 1);
     REQUIRE(ta.n("longBeep") == 1);
-    REQUIRE(ta.n("startColdTimer") == 1);
+    REQUIRE(ta.n("coldTimerStart") == 1);
     CHECK(ta.totalCalls() == 6);
 }
 
@@ -139,8 +139,8 @@ TEST_CASE("Shower hot in water on -> shower running")
 
     uut.showerHot();
 
-    REQUIRE(ta.n("stopColdTimer") == 1);
-    REQUIRE(ta.n("startShowerTimer") == 1);
+    REQUIRE(ta.n("coldTimerStop") == 1);
+    REQUIRE(ta.n("showerTimerStart") == 1);
     REQUIRE(ta.n("greenLedFlashing") == 1);
     REQUIRE(ta.n("longBeep") == 1);
     CHECK(ta.totalCalls() == 4);
@@ -184,13 +184,13 @@ const TestVector table[] =
         "Init (Idle) + Start -> Water On",
         { },
         "start",
-        { "greenLedOn", "longBeep", "showShowerTime", "displayBright", "startColdTimer", "valveOpen" }
+        { "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen" }
     },
     {
         "Init (Idle) + Cold timer expired -> no effect",
         { },
         "coldTimerExpired",
-        { "poo" }
+        { }
     },
     {
         "Init (Idle) + Shower hot -> no effect",

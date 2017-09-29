@@ -63,15 +63,15 @@ private:
         actions.longBeep();
         actions.showShowerTime();
         actions.displayBright();
-        actions.startColdTimer();
+        actions.coldTimerStart();
         actions.valveOpen();
     }
 
     void showerRunning()
     {
         state = state_showerRunning;
-        actions.stopColdTimer();
-        actions.startShowerTimer();
+        actions.coldTimerStop();
+        actions.showerTimerStart();
         actions.greenLedFlashing();
         actions.longBeep();
     }
