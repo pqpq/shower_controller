@@ -8,6 +8,7 @@ public:
     virtual void start() = 0;
     virtual void coldTimerExpired() = 0;
     virtual void showerHot() = 0;
+    virtual void showerCold() = 0;
     virtual void fiveMinutesToGo() = 0;
     virtual void oneMinuteToGo() = 0;
     virtual void fiveSecondsPassed() = 0;
@@ -18,5 +19,6 @@ public:
     virtual void reset() = 0;
     virtual void plusButton() = 0;
     virtual void minusButton() = 0;
+    virtual void lockoutTimerExpired() = 0;
 
 };

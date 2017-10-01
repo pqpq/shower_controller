@@ -28,10 +28,10 @@ public:
     virtual void alternateLedsFlashing() { _calls.push_back("alternateLedsFlashing"); }
 
     virtual void showShowerTime()   { _calls.push_back("showShowerTime"); }
-    virtual void countDownTime()    { _calls.push_back("countDownTime"); }
-    virtual void countDownLockout() { _calls.push_back("countDownLockout"); }
+    virtual void showLockoutTime()  { _calls.push_back("showLockoutTime"); }
     virtual void displayDim()       { _calls.push_back("displayDim"); }
     virtual void displayBright()    { _calls.push_back("displayBright"); }
+    virtual void displayFlash()     { _calls.push_back("displayFlash"); }
 
     virtual void shortBeep()        { _calls.push_back("shortBeep"); }
     virtual void longBeep()         { _calls.push_back("longBeep"); }
@@ -40,6 +40,7 @@ public:
     virtual void coldTimerStart()   { _calls.push_back("coldTimerStart"); }
     virtual void coldTimerStop()    { _calls.push_back("coldTimerStop"); }
     virtual void showerTimerStart() { _calls.push_back("showerTimerStart"); }
+    virtual void lockoutTimerStart(){ _calls.push_back("lockoutTimerStart"); }
 
     void reset()
     {
@@ -87,42 +88,6 @@ TEST_CASE("Start causes no actions from water on")
     CHECK(ta.totalCalls() == 0);
 }
 
-TEST_CASE("Cold timer expired in water on -> idle")
-{
-    TestActions ta;
-    Controller uut(ta);
-
-    // get to 'water on' state
-    uut.start();
-    ta.reset();
-
-    uut.coldTimerExpired();
-
-    REQUIRE(ta.n("greenLedOn") == 1);
-    REQUIRE(ta.n("valveClosed") == 1);
-    REQUIRE(ta.n("showShowerTime") == 1);
-    REQUIRE(ta.n("displayDim") == 1);
-    REQUIRE(ta.n("shortBeep") == 1);
-    CHECK(ta.totalCalls() == 5);
-}
-
-TEST_CASE("Shower hot in water on -> shower running")
-{
-    TestActions ta;
-    Controller uut(ta);
-
-    // get to 'water on' state
-    uut.start();
-    ta.reset();
-
-    uut.showerHot();
-
-    REQUIRE(ta.n("coldTimerStop") == 1);
-    REQUIRE(ta.n("showerTimerStart") == 1);
-    REQUIRE(ta.n("greenLedFlashing") == 1);
-    REQUIRE(ta.n("longBeep") == 1);
-    CHECK(ta.totalCalls() == 4);
-}
 
 struct TestVector
 {
@@ -137,6 +102,7 @@ void apply(Controller& uut, std::string event)
     if (event == "start")               uut.start();
     if (event == "coldTimerExpired")    uut.coldTimerExpired();
     if (event == "showerHot")           uut.showerHot();
+    if (event == "showerCold")          uut.showerCold();
     if (event == "fiveMinutesToGo")     uut.fiveMinutesToGo();
     if (event == "oneMinuteToGo")       uut.oneMinuteToGo();
     if (event == "fiveSecondsPassed")   uut.fiveSecondsPassed();
@@ -145,6 +111,9 @@ void apply(Controller& uut, std::string event)
     if (event == "dongleIn")            uut.dongleIn();
     if (event == "dongleOut")           uut.dongleOut();
     if (event == "reset")               uut.reset();
+    if (event == "plusButton")          uut.plusButton();
+    if (event == "minusButton")         uut.minusButton();
+    if (event == "lockoutTimerExpired") uut.lockoutTimerExpired();
 }
 
 void apply(const TestVector& v)
@@ -169,6 +138,7 @@ void apply(const TestVector& v)
 
 const TestVector table[] =
 {
+    // Idle state
     {
         "Init (Idle) + Start -> Water On",
         { },
@@ -188,16 +158,50 @@ const TestVector table[] =
         { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
     },
     {
-        "Init (Idle) + dongle out -> Idle",
+        "Init (Idle) + events that should be ignored -> no effect",
         { },
-        { "dongleOut" },
+        { "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton" },
+        { }
+    },
+
+    // Water On state
+    {
+        "Water On + cold timer expired -> idle",
+        { "start" }, // get to test state
+        { "coldTimerExpired" },
+        { "shortBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+    },
+    {
+        "Water On + shower hot -> shower running",
+        { "start" }, // get to test state
+        { "showerHot" },
+        { "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep" }
+    },
+    {
+        "Water On + dongle in -> Override",
+        { },
+        { "dongleIn" },
+        { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
+    },
+    {
+        "Water on + reset -> idle",
+        { },
+        { "reset" },
         { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
-        "Init (Idle) + events that should be ignored -> no effect",
-        { },
-        { "coldTimerExpired", "showerHot", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton" },
+        "Water On + events that should be ignored -> no effect",
+        { "start" }, // get to test state
+        { "events" },
         { }
+    },
+
+    // Override state
+    {
+        "Override + dongle out -> Idle",
+        { "dongleIn" }, // get to test state
+        { "dongleOut" },
+        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
 };
 

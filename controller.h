@@ -33,6 +33,7 @@ public:
         }
     }
 
+    virtual void showerCold() {}
     virtual void fiveMinutesToGo() {}
     virtual void oneMinuteToGo() {}
     virtual void fiveSecondsPassed() {}
@@ -43,6 +44,7 @@ public:
     virtual void reset() { goToIdleSpecial(); }
     virtual void plusButton() {}
     virtual void minusButton() {}
+    virtual void lockoutTimerExpired() {}
 
 private:
 
@@ -95,7 +97,7 @@ private:
         actions.coldTimerStop();
         actions.showerTimerStart();
         actions.greenLedFlashing();
-        actions.longBeep();
+        actions.shortBeep();
     }
 
     void override()

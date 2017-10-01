@@ -124,6 +124,8 @@ Override ->
 * Display time on 7seg, bright
 
 Reset-> Idle
+* Succession of short beeps so you reset has occurred
+
 
 ### 7 Segments
 Show time in minutes.
