@@ -19,7 +19,7 @@ public:
 
     void coldTimerExpired() override final
     {
-        if (state != state_idle)
+        if (state != state_idle && state != state_override)
         {
             goToIdleNormal();
         }
@@ -41,9 +41,29 @@ public:
     virtual void showerTimerExpired() {}
     virtual void dongleIn() { override(); }
     virtual void dongleOut() { goToIdleSpecial(); }
-    virtual void reset() { goToIdleSpecial(); }
-    virtual void plusButton() {}
-    virtual void minusButton() {}
+    virtual void reset()
+    {
+        if (state != state_override)
+        {
+            goToIdleSpecial();
+        }
+    }
+    virtual void plusButton()
+    {
+        if (state == state_override)
+        {
+            actions.shortBeep();
+            actions.timeAdd();
+        }
+    }
+    virtual void minusButton()
+    {
+        if (state == state_override)
+        {
+            actions.shortBeep();
+            actions.timeRemove();
+        }
+    }
     virtual void lockoutTimerExpired() {}
 
 private:
@@ -76,6 +96,10 @@ private:
 
     void goToIdleSpecial()
     {
+        if (state == state_override)
+        {
+            actions.timeSave();
+        }
         actions.rapidBeep();
         idleState();
     }

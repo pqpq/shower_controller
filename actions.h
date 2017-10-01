@@ -28,4 +28,9 @@ public:
     virtual void coldTimerStop() = 0;
     virtual void showerTimerStart() = 0;
     virtual void lockoutTimerStart() = 0;
+
+    virtual void timeAdd() = 0;
+    virtual void timeRemove() = 0;
+    virtual void timeSave() = 0;
+
 };

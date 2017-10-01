@@ -42,6 +42,10 @@ public:
     virtual void showerTimerStart() { _calls.push_back("showerTimerStart"); }
     virtual void lockoutTimerStart(){ _calls.push_back("lockoutTimerStart"); }
 
+    virtual void timeAdd()          { _calls.push_back("timeAdd"); }
+    virtual void timeRemove()       { _calls.push_back("timeRemove"); }
+    virtual void timeSave()         { _calls.push_back("timeSave"); }
+
     void reset()
     {
         _calls.clear();
@@ -202,7 +206,27 @@ const TestVector table[] =
         "Override + dongle out -> Idle",
         { "dongleIn" }, // get to test state
         { "dongleOut" },
-        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+        { "timeSave", "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+    },
+    {
+        "Override + plus Button -> increase time",
+        { "dongleIn" }, // get to test state
+        { "plusButton" },
+        { "shortBeep", "timeAdd" }
+    },
+    {
+        "Override + minus Button -> decrease time",
+        { "dongleIn" }, // get to test state
+        { "minusButton" },
+        { "shortBeep", "timeRemove" }
+    },
+    {
+        "Override + events that should be ignored -> no effect",
+        { "dongleIn" }, // get to test state
+        { "start", "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo",
+          "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
+          "lockoutTimerExpired", "reset" },
+        {  }
     },
 };
 
