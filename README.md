@@ -8,11 +8,11 @@ So we need an automatic system that can limit shower time, lock out the shower a
 
 ## Hardware
 ### Interface to existing shower
-Solenoid water valve. NC, so controller has to turn water on, then it can turn it off again when time’s up. If it was NO, when the controller decides to allow another shower, the shower would suddenly burst into life again with nobody there. Also not fail safe.
+Solenoid water valve. NC (Normally Closed), so controller has to turn water on, then it can turn it off again when time’s up. If it was NO, when the controller decides to allow another shower, the shower would suddenly burst into life again with nobody there. Also NO would not be fail safe.
 
 Hall effect sensor to detect current flow in shower cable? Can automatically tell when shower has ended so you don’t have to manually switch the unit off before it alarms
 
-When plumbed in, have a bypass valve in case it fails.
+When plumbed in, have a bypass valve in case timer fails.
 
 Make sure power comes from fuse box side of shower switch. Otherwise unit can be reset by turning off shower. Shower MCB will still protect the unit.
 
