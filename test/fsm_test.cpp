@@ -192,7 +192,8 @@ const TestVector table[] =
     {
         "Water On + events that should be ignored -> no effect",
         { "start" }, // get to test state
-        { "events" },
+        { "start", "showerCold", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed",
+          "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton", "lockoutTimerExpired" },
         { }
     },
 
@@ -215,3 +216,26 @@ TEST_CASE("Table driven FSM test")
         }
     }
 }
+
+
+/*
+
+All events:
+
+    "start",
+    "coldTimerExpired",
+    "showerHot",
+    "showerCold",
+    "fiveMinutesToGo",
+    "oneMinuteToGo",
+    "fiveSecondsPassed",
+    "tenSecondsToGo",
+    "showerTimerExpired",
+    "dongleIn",
+    "dongleOut",
+    "reset",
+    "plusButton",
+    "minusButton",
+    "lockoutTimerExpired",
+
+ */
