@@ -155,7 +155,7 @@ struct TestVector
 {
     std::string testName;
     std::vector<std::string> eventsToGetToTestState;
-    std::string eventToApply;
+    std::vector<std::string> eventsToApply;
     std::vector<std::string> expectedActions;
 };
 
@@ -177,7 +177,10 @@ void apply(const TestVector& v)
     }
     ta.reset();
 
-    apply(uut, v.eventToApply);
+    for (const auto& e : v.eventsToApply)
+    {
+        apply(uut, e);
+    }
 
     REQUIRE(ta.calls() == v.expectedActions);
 }
@@ -188,19 +191,19 @@ const TestVector table[] =
     {
         "Init (Idle) + Start -> Water On",
         { },
-        "start",
+        { "start" },
         { "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen" }
     },
     {
         "Init (Idle) + Cold timer expired -> no effect",
         { },
-        "coldTimerExpired",
+        { "coldTimerExpired" },
         { }
     },
     {
-        "Init (Idle) + Shower hot -> no effect",
+        "Init (Idle) + events that should be ignored -> no effect",
         { },
-        "showerHot",
+        { "showerHot", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "dongleIn", "dongleOut" },
         { }
     },
 };
