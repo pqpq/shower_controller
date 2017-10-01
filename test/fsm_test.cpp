@@ -1,7 +1,11 @@
-#include "../actions.h"
-#include "../actions.h"
+// Include all UUTs twice to test include guard
+// Include them before all other includes to ensure they stand alone.
 #include "../controller.h"
 #include "../controller.h"
+#include "../actions.h"
+#include "../actions.h"
+#include "../events.h"
+#include "../events.h"
 
 #define CATCH_CONFIG_MAIN
 #define CATCH_CONFIG_COLOUR_NONE
@@ -13,6 +17,9 @@
 using namespace std;
 
 
+/// Test implementation of the Actions interface that allows us to interrogate
+/// it after a test and work out which Actions have been called, and in what
+/// order.
 class TestActions : public Actions
 {
 public:
@@ -56,17 +63,21 @@ public:
         return count(_calls.begin(), _calls.end(), fn);
     }
 
-    size_t totalCalls() const { return _calls.size(); }
-
     const vector<string>& calls() const { return _calls; }
 
 private:
+
+    /// Remember which calls have been made.
+    /// By simply remembering the function names in the order they were called
+    /// we can test for:
+    /// 1) whether a function has been called (is it in the container?)
+    /// 2) how many times it has been called (count instances in the container)
+    /// 3) order of calls (compare container with expected order)
     vector<string> _calls;
 };
 
 
-
-TEST_CASE("Can create an instance")
+TEST_CASE("Check a new instance puts the hardware in the right state")
 {
     TestActions ta;
     const Controller uut(ta);
@@ -76,20 +87,7 @@ TEST_CASE("Can create an instance")
     REQUIRE(ta.n("showShowerTime") == 1);
     REQUIRE(ta.n("displayDim") == 1);
     REQUIRE(ta.n("shortBeep") == 1);
-    CHECK(ta.totalCalls() == 5);
-}
-
-TEST_CASE("Start causes no actions from water on")
-{
-    TestActions ta;
-    Controller uut(ta);
-
-    // get to 'water on' state
-    uut.start();
-    ta.reset();
-
-    uut.start();
-    CHECK(ta.totalCalls() == 0);
+    CHECK(ta.calls().size() == 5);
 }
 
 
@@ -103,7 +101,7 @@ struct TestVector
 
 void apply(Controller& uut, std::string event)
 {
-    if (event == "start")               uut.start();
+    if (event == "startButton")         uut.startButton();
     if (event == "coldTimerExpired")    uut.coldTimerExpired();
     if (event == "showerHot")           uut.showerHot();
     if (event == "showerCold")          uut.showerCold();
@@ -129,7 +127,8 @@ void apply(const TestVector& v)
     {
         apply(uut, e);
     }
-    ta.reset();
+
+    ta.reset();     // Clear side effects of getting to the test state
 
     for (const auto& e : v.eventsToApply)
     {
@@ -146,7 +145,7 @@ const TestVector table[] =
     {
         "Init (Idle) + Start -> Water On",
         { },
-        { "start" },
+        { "startButton" },
         { "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen" }
     },
     {
@@ -171,32 +170,32 @@ const TestVector table[] =
     // Water On state
     {
         "Water On + cold timer expired -> idle",
-        { "start" }, // get to test state
+        { "startButton" }, // get to test state
         { "coldTimerExpired" },
         { "shortBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
         "Water On + shower hot -> shower running",
-        { "start" }, // get to test state
+        { "startButton" }, // get to test state
         { "showerHot" },
         { "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep" }
     },
     {
         "Water On + dongle in -> Override",
-        { },
+        { "startButton" }, // get to test state
         { "dongleIn" },
         { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
     },
     {
         "Water on + reset -> idle",
-        { },
+        { "startButton" }, // get to test state
         { "reset" },
         { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
         "Water On + events that should be ignored -> no effect",
-        { "start" }, // get to test state
-        { "start", "showerCold", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed",
+        { "startButton" }, // get to test state
+        { "startButton", "showerCold", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed",
           "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton", "lockoutTimerExpired" },
         { }
     },
@@ -223,7 +222,7 @@ const TestVector table[] =
     {
         "Override + events that should be ignored -> no effect",
         { "dongleIn" }, // get to test state
-        { "start", "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo",
+        { "startButton", "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo",
           "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
           "lockoutTimerExpired", "reset" },
         {  }
@@ -246,7 +245,7 @@ TEST_CASE("Table driven FSM test")
 
 All events:
 
-    "start",
+    "startButton",
     "coldTimerExpired",
     "showerHot",
     "showerCold",

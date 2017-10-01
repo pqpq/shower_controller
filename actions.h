@@ -1,5 +1,9 @@
 #pragma once
 
+/// The actions that come from our state machine.
+///
+/// The implementation details of each action are outside the scope of the state
+/// machine, but are obviously carried out by the underlying hardware.
 class Actions
 {
 public:

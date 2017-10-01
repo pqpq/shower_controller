@@ -3,13 +3,19 @@
 #include "actions.h"
 #include "events.h"
 
+/// Finite State Machine that responds to Events, causing Actions, depending
+/// on the internal state.
+/// This pattern is described in https://accu.org/index.php/journals/1548
+/// It allows us to write and test the FSM with no dependencies on the embedded
+/// system that it will eventually control.
+
 class Controller : public Events
 {
 public:
     Controller(Actions& a) : actions(a) { goToIdleNormal(); }
 
     // Events
-    void start() override final
+    void startButton() override final
     {
         if (state == state_idle)
         {
@@ -41,6 +47,7 @@ public:
     virtual void showerTimerExpired() {}
     virtual void dongleIn() { override(); }
     virtual void dongleOut() { goToIdleSpecial(); }
+
     virtual void reset()
     {
         if (state != state_override)
@@ -48,6 +55,7 @@ public:
             goToIdleSpecial();
         }
     }
+
     virtual void plusButton()
     {
         if (state == state_override)
@@ -56,6 +64,7 @@ public:
             actions.timeAdd();
         }
     }
+
     virtual void minusButton()
     {
         if (state == state_override)
@@ -64,6 +73,7 @@ public:
             actions.timeRemove();
         }
     }
+
     virtual void lockoutTimerExpired() {}
 
 private:
