@@ -4,17 +4,19 @@ An Arduino based timer controller for a domestic electric shower.
 ## Why
 Our eldest son is suffering from OCD and likes to spend a *long* time in the shower as part of his calming down process. This means we have to police his shower usage, whatever the time of day or night, to make sure he doesn't shower for too long. "Too long" can be an hour or more, if nobody is paying attention. Sometimes he is only ready for a shower at midnight. Or at 10am after everyone has left the house.
 
-So we need an automatic system that can limit shower time, lock out the shower after, but do all this kindly, so the user can see time passing and is not surprised when the shower switches off.
+So we need an automatic system that can limit shower time, lock out the shower for a while, then automatically enable it again. All this has to be done kindly, so the user can see time passing and gets plenty of warnings so they are not surprised when the shower switches off.
+
+Shower time has to be programmable so we can start with a longer time then slowly work down to what we think is reasonable. The programming has to be protected so you can't just open the cupboard and put it back to 1 hour when nobody is looking.
 
 ## Hardware
 ### Interface to existing shower
-Solenoid water valve. NC (Normally Closed), so controller has to turn water on, then it can turn it off again when time’s up. If it was NO, when the controller decides to allow another shower, the shower would suddenly burst into life again with nobody there. Also NO would not be fail safe.
+Solenoid water valve. NC (Normally Closed), so controller has to turn water on, then it can turn it off again when time’s up. If it was NO (Normally Open), when the controller decides to allow another shower, the shower would suddenly burst into life again with nobody there. Also NO would not be fail safe.
 
 Hall effect sensor to detect current flow in shower cable? Can automatically tell when shower has ended so you don’t have to manually switch the unit off before it alarms
 
-When plumbed in, have a bypass valve in case timer fails.
+When plumbed in, have a bypass valve in case timer fails. This should need tools to operate otherwise it would be too easy to defeat the timer.
 
-Make sure power comes from fuse box side of shower switch. Otherwise unit can be reset by turning off shower. Shower MCB will still protect the unit.
+Power must come from fuse box side of the existing shower switch. Otherwise the unit can simply be reset by turning off the shower. The shower MCB will still protect the timer.
 
 ### User facing
 
@@ -28,7 +30,7 @@ Green LED to indicate unit is on, and shower can start
 
 Red LED to indicate no shower allowed
 
-Reed switch to override lockout using a magnet? Position this somewhere else? Will magnet work through tiles and plasterboard?
+Reed switch to reset the unit using a magnet? Position this somewhere else? Will magnet work through tiles and plasterboard? This is a get out of jail free card, and also allows someone else to have a shower while the lockout is still active, if they have the magic touch.
 
 ### Back panel
 + and - buttons to change time? Simpler. Possible to use analogue I/P for these to free DIO.
@@ -39,7 +41,7 @@ _Old ideas:_
 * _Push to hold button while changing time, or push once after changing time?_
 * _Reed switch so you can’t just change the time willy-nilly?_
 
-Duplicate 7-seg to show time when programming? Only comes on when programming key enabled? Power it via a link in programming key?
+Duplicate 7-seg to show time when programming? Only comes on when programming key enabled? Power it via a link in programming key? Bit of a luxury, and complex to build.
 
 ### Other
 USB power supply for 5v?
@@ -196,7 +198,7 @@ Ribbon cable to front panel.
 
 5-pin DIN “dongle” to enable override (always on, program times). This is just a fancy wiring jumble earthing an LED, and pulling an IO line low. Can also earth low side of +/- buttons so they just don’t work when dongle is out.
 
-Glue buzzer to back of front panel - panel will be sound board. Use PWM 50%, change frequency, to drive it?
+Glue buzzer to back of front panel - panel will be sound board. Use Arduino PWM channel, on 50% duty cycle, change frequency, to drive it?
 
 Tune hall sensor so when shower is on but cold (i.e. heater isn’t drawing lots of amps), don’t trigger timer, so shower can be used for washing out etc.
 
