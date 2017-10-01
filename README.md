@@ -6,33 +6,6 @@ Our eldest son is suffering from OCD and likes to spend a *long* time in the sho
 
 So we need an automatic system that can limit shower time, lock out the shower after, but do all this kindly, so the user can see time passing and is not surprised when the shower switches off.
 
-## Ideas
-Multiplex the 7-seg onto the same 7 DIO lines. Enable each in turn, 50% duty cycle. 
-7 lines for data, 1 for select, 2 for other LEDs = 10 
-
-or... 
-
-2 for binary select, with 4 destinations for 7 data: 2 7seg, 2 LEDs, lots spare = 9 but more HW to demux. Probably unnecessary
-
-“Front panel” behind smoked perspex, 15x15 so it can be tiled into the shower enclosure
-
-Hard code LED animation, don’t work it out programmatically!
-Hard code PWM or flashing - just toggle between 2 arrays
-Use spreadsheet to calculate byte values for this
-
-Ribbon cable to front panel.
-
-5-pin DIN “dongle” to enable override (always on, program times). This is just a fancy wiring jumble earthing an LED, and pulling an IO line low. Can also earth low side of +/- buttons so they just don’t work when dongle is out.
-
-Glue buzzer to back of front panel - panel will be sound board. Use PWM 50%, change frequency, to drive it?
-
-Tune hall sensor so when shower is on but cold (i.e. heater isn’t drawing lots of amps), don’t trigger timer, so shower can be used for washing out etc.
-
-Raise tone of beep as the last minute expires?!
-
-Use PWM to generate tones, so we can free up DIO and/or CPU cycles? If not, tone library exists.
-
-
 ## Hardware
 ### Interface to existing shower
 Solenoid water valve. NC, so controller has to turn water on, then it can turn it off again when time’s up. If it was NO, when the controller decides to allow another shower, the shower would suddenly burst into life again with nobody there. Also not fail safe.
@@ -150,6 +123,8 @@ Override ->
 * +/- buttons change time, short beep for each press
 * Display time on 7seg, bright
 
+Reset-> Idle
+
 ### 7 Segments
 Show time in minutes.
 Count down when shower in progress
@@ -200,5 +175,32 @@ Just switch over to displaying seconds for last minute? Not so much fun though!
 Valve: http://www.solenoid-valve.world/by-industry/water-industry/115BC-RPE-solenoid-valve
 
 Current sense: https://www.proto-pic.co.uk/acs712-breakout.html
+
+## Ideas
+Multiplex the 7-seg onto the same 7 DIO lines. Enable each in turn, 50% duty cycle. 
+7 lines for data, 1 for select, 2 for other LEDs = 10 
+
+or... 
+
+2 for binary select, with 4 destinations for 7 data: 2 7seg, 2 LEDs, lots spare = 9 but more HW to demux. Probably unnecessary
+
+“Front panel” behind smoked perspex, 15x15 so it can be tiled into the shower enclosure
+
+Hard code LED animation, don’t work it out programmatically!
+Hard code PWM or flashing - just toggle between 2 arrays
+Use spreadsheet to calculate byte values for this
+
+Ribbon cable to front panel.
+
+5-pin DIN “dongle” to enable override (always on, program times). This is just a fancy wiring jumble earthing an LED, and pulling an IO line low. Can also earth low side of +/- buttons so they just don’t work when dongle is out.
+
+Glue buzzer to back of front panel - panel will be sound board. Use PWM 50%, change frequency, to drive it?
+
+Tune hall sensor so when shower is on but cold (i.e. heater isn’t drawing lots of amps), don’t trigger timer, so shower can be used for washing out etc.
+
+Raise tone of beep as the last minute expires?!
+
+Use PWM to generate tones, so we can free up DIO and/or CPU cycles? If not, tone library exists.
+
 
 
