@@ -15,5 +15,8 @@ public:
     virtual void showerTimerExpired() = 0;
     virtual void dongleIn() = 0;
     virtual void dongleOut() = 0;
-    virtual void blah() = 0;
+    virtual void reset() = 0;
+    virtual void plusButton() = 0;
+    virtual void minusButton() = 0;
+
 };

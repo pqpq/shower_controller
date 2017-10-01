@@ -12,6 +12,7 @@ public:
     virtual void greenLedOff() = 0;
     virtual void greenLedFlashing() = 0;
     virtual void redLedFlashing() = 0;
+    virtual void alternateLedsFlashing() = 0;
 
     virtual void showShowerTime() = 0;
     virtual void countDownTime() = 0;

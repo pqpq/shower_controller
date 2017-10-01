@@ -25,6 +25,7 @@ public:
     virtual void greenLedOff()      { _calls.push_back("greenLedOff"); }
     virtual void greenLedFlashing() { _calls.push_back("greenLedFlashing"); }
     virtual void redLedFlashing()   { _calls.push_back("redLedFlashing"); }
+    virtual void alternateLedsFlashing() { _calls.push_back("alternateLedsFlashing"); }
 
     virtual void showShowerTime()   { _calls.push_back("showShowerTime"); }
     virtual void countDownTime()    { _calls.push_back("countDownTime"); }
@@ -73,23 +74,6 @@ TEST_CASE("Can create an instance")
     CHECK(ta.totalCalls() == 5);
 }
 
-TEST_CASE("Start causes various actions from idle")
-{
-    TestActions ta;
-    Controller uut(ta);
-    ta.reset();
-
-    uut.start();
-
-    REQUIRE(ta.n("greenLedOn") == 1);
-    REQUIRE(ta.n("valveOpen") == 1);
-    REQUIRE(ta.n("showShowerTime") == 1);
-    REQUIRE(ta.n("displayBright") == 1);
-    REQUIRE(ta.n("longBeep") == 1);
-    REQUIRE(ta.n("coldTimerStart") == 1);
-    CHECK(ta.totalCalls() == 6);
-}
-
 TEST_CASE("Start causes no actions from water on")
 {
     TestActions ta;
@@ -100,17 +84,6 @@ TEST_CASE("Start causes no actions from water on")
     ta.reset();
 
     uut.start();
-    CHECK(ta.totalCalls() == 0);
-}
-
-TEST_CASE("Cold timer expired in idle -> no actions")
-{
-    TestActions ta;
-    Controller uut(ta);
-    ta.reset();
-
-    uut.coldTimerExpired();
-
     CHECK(ta.totalCalls() == 0);
 }
 
@@ -164,6 +137,14 @@ void apply(Controller& uut, std::string event)
     if (event == "start")               uut.start();
     if (event == "coldTimerExpired")    uut.coldTimerExpired();
     if (event == "showerHot")           uut.showerHot();
+    if (event == "fiveMinutesToGo")     uut.fiveMinutesToGo();
+    if (event == "oneMinuteToGo")       uut.oneMinuteToGo();
+    if (event == "fiveSecondsPassed")   uut.fiveSecondsPassed();
+    if (event == "tenSecondsToGo")      uut.tenSecondsToGo();
+    if (event == "showerTimerExpired")  uut.showerTimerExpired();
+    if (event == "dongleIn")            uut.dongleIn();
+    if (event == "dongleOut")           uut.dongleOut();
+    if (event == "reset")               uut.reset();
 }
 
 void apply(const TestVector& v)
@@ -195,15 +176,27 @@ const TestVector table[] =
         { "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen" }
     },
     {
-        "Init (Idle) + Cold timer expired -> no effect",
+        "Init (Idle) + reset -> stay in idle, feedback that reset occurred",
         { },
-        { "coldTimerExpired" },
-        { }
+        { "reset" },
+        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+    },
+    {
+        "Init (Idle) + dongle in -> Override",
+        { },
+        { "dongleIn" },
+        { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
+    },
+    {
+        "Init (Idle) + dongle out -> Idle",
+        { },
+        { "dongleOut" },
+        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
         "Init (Idle) + events that should be ignored -> no effect",
         { },
-        { "showerHot", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "dongleIn", "dongleOut" },
+        { "coldTimerExpired", "showerHot", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton" },
         { }
     },
 };

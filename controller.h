@@ -6,7 +6,7 @@
 class Controller : public Events
 {
 public:
-    Controller(Actions& a) : actions(a) { idle(); }
+    Controller(Actions& a) : actions(a) { goToIdleNormal(); }
 
     // Events
     void start() override final
@@ -21,7 +21,7 @@ public:
     {
         if (state != state_idle)
         {
-            idle();
+            goToIdleNormal();
         }
     }
 
@@ -38,9 +38,11 @@ public:
     virtual void fiveSecondsPassed() {}
     virtual void tenSecondsToGo() {}
     virtual void showerTimerExpired() {}
-    virtual void dongleIn() {}
-    virtual void dongleOut() {}
-    virtual void blah() {}
+    virtual void dongleIn() { override(); }
+    virtual void dongleOut() { goToIdleSpecial(); }
+    virtual void reset() { goToIdleSpecial(); }
+    virtual void plusButton() {}
+    virtual void minusButton() {}
 
 private:
 
@@ -49,19 +51,31 @@ private:
         state_idle,
         state_waterOn,
         state_showerRunning,
+        state_override
     };
 
     Actions& actions;
     State state;
 
-    void idle()
+    void idleState()
     {
         state = state_idle;
         actions.greenLedOn();
         actions.valveClosed();
-        actions.shortBeep();
         actions.showShowerTime();
         actions.displayDim();
+    }
+
+    void goToIdleNormal()
+    {
+        actions.shortBeep();
+        idleState();
+    }
+
+    void goToIdleSpecial()
+    {
+        actions.rapidBeep();
+        idleState();
     }
 
     void waterOn()
@@ -82,6 +96,16 @@ private:
         actions.showerTimerStart();
         actions.greenLedFlashing();
         actions.longBeep();
+    }
+
+    void override()
+    {
+        state = state_override;
+        actions.rapidBeep();
+        actions.alternateLedsFlashing();
+        actions.valveOpen();
+        actions.showShowerTime();
+        actions.displayBright();
     }
 };
 
