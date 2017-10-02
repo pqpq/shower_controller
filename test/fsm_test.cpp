@@ -35,6 +35,7 @@ public:
     virtual void alternateLedsFlashing() { _calls.push_back("alternateLedsFlashing"); }
 
     virtual void showShowerTime()   { _calls.push_back("showShowerTime"); }
+    virtual void showFinalCountdown(){ _calls.push_back("showFinalCountdown"); }
     virtual void showLockoutTime()  { _calls.push_back("showLockoutTime"); }
     virtual void displayDim()       { _calls.push_back("displayDim"); }
     virtual void displayBright()    { _calls.push_back("displayBright"); }
@@ -163,7 +164,8 @@ const TestVector table[] =
     {
         "Init (Idle) + events that should be ignored -> no effect",
         { },
-        { "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton" },
+        { "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo", "oneMinuteToGo",
+          "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton" },
         { }
     },
 
@@ -199,6 +201,138 @@ const TestVector table[] =
           "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton", "lockoutTimerExpired" },
         { }
     },
+
+    // Shower running state
+    {
+        "Shower running + 5 mins to go -> beep",
+        { "startButton", "showerHot" }, // get to test state
+        { "fiveMinutesToGo" },
+        { "shortBeep" }
+    },
+    {
+        "Shower running + 5 mins to go + 5 sec passed -> nothing",
+        { "startButton", "showerHot", "fiveMinutesToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Shower running + 1 min to go -> warnings",
+        { "startButton", "showerHot" }, // get to test state
+        { "oneMinuteToGo" },
+        { "longBeep", "showFinalCountdown" }
+    },
+    {
+        "Shower running + 1 min to go + 5 sec passed -> beep",
+        { "startButton", "showerHot", "oneMinuteToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { "shortBeep" }
+    },
+    {
+        "Shower running + 10 secs to go -> warnings",
+        { "startButton", "showerHot" }, // get to test state
+        { "tenSecondsToGo" },
+        { "rapidBeep", "displayFlash" }
+    },
+    {
+        "Shower running + 10 secs to go + 5 sec passed -> beep",
+        { "startButton", "showerHot", "tenSecondsToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { "rapidBeep" }
+    },
+
+    {
+        "Shower running + then off, 5 mins to go -> no beep",
+        { "startButton", "showerHot", "showerCold" }, // get to test state
+        { "fiveMinutesToGo" },
+        { }
+    },
+    {
+        "Shower running + then off, 1 min to go -> no beep",
+        { "startButton", "showerHot", "showerCold" }, // get to test state
+        { "oneMinuteToGo" },
+        { "showFinalCountdown" }
+    },
+    {
+        "Shower running + then off, 1 min to go + 5 sec passed -> no beep",
+        { "startButton", "showerHot", "showerCold", "oneMinuteToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Shower running + then off + 10 secs to go -> warnings",
+        { "startButton", "showerHot", "showerCold" }, // get to test state
+        { "tenSecondsToGo" },
+        { "displayFlash" }
+    },
+    {
+        "Shower running + then off + 10 secs to go + 5 sec passed -> no beep",
+        { "startButton", "showerHot", "showerCold", "tenSecondsToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Shower running + then off then on again, 5 mins to go -> warnings",
+        { "startButton", "showerHot", "showerCold", "showerHot" }, // get to test state
+        { "fiveMinutesToGo" },
+        { "shortBeep" }
+    },
+    {
+        "Shower running + then off then on again, 5 mins to go + 5 sec passed -> nothing",
+        { "startButton", "showerHot", "showerCold", "showerHot", "fiveMinutesToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Shower running + then off then on again, 1 min to go -> warnings",
+        { "startButton", "showerHot", "showerCold", "showerHot" }, // get to test state
+        { "oneMinuteToGo" },
+        { "longBeep", "showFinalCountdown" }
+    },
+    {
+        "Shower running + then off then on again, 1 min to go + 5 sec passed -> beep",
+        { "startButton", "showerHot", "showerCold", "showerHot", "oneMinuteToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { "shortBeep" }
+    },
+    {
+        "Shower running + then off then on again, 10 secs to go -> warnings",
+        { "startButton", "showerHot", "showerCold", "showerHot" }, // get to test state
+        { "tenSecondsToGo" },
+        { "rapidBeep", "displayFlash" }
+    },
+    {
+        "Shower running + then off then on again, 10 secs to go + 5 sec passed -> beep",
+        { "startButton", "showerHot", "showerCold", "showerHot", "tenSecondsToGo" }, // get to test state
+        { "fiveSecondsPassed" },
+        { "rapidBeep" }
+    },
+    {
+        "Shower running + timer expired -> Lockout",
+        { "startButton", "showerHot" }, // get to test state
+        { "showerTimerExpired" },
+        { "redLedFlashing", "valveClosed", "showLockoutTime" }
+    },
+    {
+        "Shower running + dongle in -> Override",
+        { "startButton", "showerHot" }, // get to test state
+        { "dongleIn" },
+        { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
+    },
+    {
+        "Shower running + reset -> idle",
+        { "startButton", "showerHot" }, // get to test state
+        { "reset" },
+        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+    },
+    {
+        "Shower running + events that should be ignored -> no effect",
+        { "startButton", "showerHot" }, // get to test state
+        { "startButton", "plusButton", "minusButton", "lockoutTimerExpired" },
+        { }
+    },
+
+    // Lockout state
+    /// @todo <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     // Override state
     {

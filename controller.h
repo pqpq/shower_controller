@@ -33,18 +33,85 @@ public:
 
     void showerHot() override final
     {
-        if (state == state_waterOn)
+        if (state == state_waterOn || state == state_showerOffStillTiming)
         {
             showerRunning();
         }
     }
 
-    virtual void showerCold() {}
-    virtual void fiveMinutesToGo() {}
-    virtual void oneMinuteToGo() {}
-    virtual void fiveSecondsPassed() {}
-    virtual void tenSecondsToGo() {}
-    virtual void showerTimerExpired() {}
+    virtual void showerCold()
+    {
+        if (state == state_showerRunning)
+        {
+            state = state_showerOffStillTiming;
+        }
+    }
+
+    virtual void fiveMinutesToGo()
+    {
+        if (state == state_showerRunning)
+        {
+            actions.shortBeep();
+        }
+    }
+
+    virtual void oneMinuteToGo()
+    {
+        if (state == state_showerRunning)
+        {
+            actions.longBeep();
+            actions.showFinalCountdown();
+            state = state_showerRunningFinalCountdown;
+        }
+        if (state == state_showerOffStillTiming)
+        {
+            actions.showFinalCountdown();
+            state = state_showerOffStillTimingFinalCountdown;
+        }
+    }
+
+    virtual void fiveSecondsPassed()
+    {
+        if (state == state_showerRunningFinalCountdown)
+        {
+            actions.shortBeep();
+        }
+        if (state == state_showerRunningVeryEnd)
+        {
+            actions.rapidBeep();
+        }
+    }
+
+    virtual void tenSecondsToGo()
+    {
+        if (state == state_showerRunning)
+        {
+            actions.rapidBeep();
+            actions.displayFlash();
+            state = state_showerRunningVeryEnd;
+        }
+        if (state == state_showerOffStillTiming)
+        {
+            actions.displayFlash();
+            state = state_showerOffStillTimingVeryEnd;
+        }
+    }
+
+    virtual void showerTimerExpired()
+    {
+        if (state == state_showerRunning ||
+            state == state_showerOffStillTiming ||
+            state == state_showerRunningFinalCountdown ||
+            state == state_showerOffStillTimingFinalCountdown ||
+            state == state_showerRunningVeryEnd ||
+            state == state_showerOffStillTimingVeryEnd)
+        {
+            actions.redLedFlashing();
+            actions.valveClosed();
+            actions.showLockoutTime();
+        }
+    }
+
     virtual void dongleIn() { override(); }
     virtual void dongleOut() { goToIdleSpecial(); }
 
@@ -83,6 +150,11 @@ private:
         state_idle,
         state_waterOn,
         state_showerRunning,
+        state_showerOffStillTiming,
+        state_showerRunningFinalCountdown,
+        state_showerOffStillTimingFinalCountdown,
+        state_showerRunningVeryEnd,
+        state_showerOffStillTimingVeryEnd,
         state_override
     };
 
