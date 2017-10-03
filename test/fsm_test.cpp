@@ -332,7 +332,32 @@ const TestVector table[] =
     },
 
     // Lockout state
-    /// @todo <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    {
+        "Lockout + lockout timer expired -> idle",
+        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
+        { "lockoutTimerExpired" },
+        { "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+    },
+    {
+        "Lockout + dongle in -> Override",
+        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
+        { "dongleIn" },
+        { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
+    },
+    {
+        "Lockout + reset -> idle",
+        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
+        { "reset" },
+        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+    },
+    {
+        "Lockout + events that should be ignored -> no effect",
+        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
+        { "startButton", "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo",
+          "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
+          "plusButton", "minusButton" },
+        { }
+    },
 
     // Override state
     {

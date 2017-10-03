@@ -25,7 +25,7 @@ public:
 
     void coldTimerExpired() override final
     {
-        if (state != state_idle && state != state_override)
+        if (state != state_idle && state != state_override && state != state_lockout)
         {
             goToIdleNormal();
         }
@@ -106,6 +106,7 @@ public:
             state == state_showerRunningVeryEnd ||
             state == state_showerOffStillTimingVeryEnd)
         {
+            state = state_lockout;
             actions.redLedFlashing();
             actions.valveClosed();
             actions.showLockoutTime();
@@ -141,7 +142,13 @@ public:
         }
     }
 
-    virtual void lockoutTimerExpired() {}
+    virtual void lockoutTimerExpired()
+    {
+        if (state == state_lockout)
+        {
+            goToIdleNoBeep();
+        }
+    }
 
 private:
 
@@ -155,13 +162,14 @@ private:
         state_showerOffStillTimingFinalCountdown,
         state_showerRunningVeryEnd,
         state_showerOffStillTimingVeryEnd,
+        state_lockout,
         state_override
     };
 
     Actions& actions;
     State state;
 
-    void idleState()
+    void goToIdleNoBeep()
     {
         state = state_idle;
         actions.greenLedOn();
@@ -173,7 +181,7 @@ private:
     void goToIdleNormal()
     {
         actions.shortBeep();
-        idleState();
+        goToIdleNoBeep();
     }
 
     void goToIdleSpecial()
@@ -183,7 +191,7 @@ private:
             actions.timeSave();
         }
         actions.rapidBeep();
-        idleState();
+        goToIdleNoBeep();
     }
 
     void waterOn()
