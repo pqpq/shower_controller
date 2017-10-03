@@ -94,13 +94,13 @@ public:
 
     virtual void tenSecondsToGo()
     {
-        if (state == showerRunning)
+        if (state == showerRunning || state == showerRunningFinalCountdown)
         {
             actions.rapidBeep();
             actions.displayFlash();
             state = showerRunningVeryEnd;
         }
-        if (state == showerOffStillTiming)
+        if (state == showerOffStillTiming || state == showerOffStillTimingFinalCountdown)
         {
             actions.displayFlash();
             state = showerOffStillTimingVeryEnd;

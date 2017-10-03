@@ -140,7 +140,7 @@ void apply(const TestVector& v)
 }
 
 
-const TestVector table[] =
+const TestVector stateTests[] =
 {
     // Idle state
     {
@@ -202,7 +202,7 @@ const TestVector table[] =
         { }
     },
 
-    // Shower running state
+    // Shower running state - normal sequence
     {
         "Shower running + 5 mins to go -> beep",
         { "startButton", "showerHot" }, // get to test state
@@ -228,8 +228,8 @@ const TestVector table[] =
         { "shortBeep" }
     },
     {
-        "Shower running + 10 secs to go -> warnings",
-        { "startButton", "showerHot" }, // get to test state
+        "Shower running, 1 min to go + 10 secs to go -> warnings",
+        { "startButton", "showerHot", "oneMinuteToGo" }, // get to test state
         { "tenSecondsToGo" },
         { "rapidBeep", "displayFlash" }
     },
@@ -239,7 +239,14 @@ const TestVector table[] =
         { "fiveSecondsPassed" },
         { "rapidBeep" }
     },
+    {
+        "Shower running + timer expired -> Lockout",
+        { "startButton", "showerHot" }, // get to test state
+        { "showerTimerExpired" },
+        { "redLedFlashing", "valveClosed", "showLockoutTime" }
+    },
 
+    // Shower running state - shower off before end
     {
         "Shower running + then off, 5 mins to go -> no beep",
         { "startButton", "showerHot", "showerCold" }, // get to test state
@@ -259,8 +266,8 @@ const TestVector table[] =
         { }
     },
     {
-        "Shower running + then off + 10 secs to go -> warnings",
-        { "startButton", "showerHot", "showerCold" }, // get to test state
+        "Shower running + then off, 1 min to go + 10 secs to go -> warnings",
+        { "startButton", "showerHot", "showerCold", "oneMinuteToGo" }, // get to test state
         { "tenSecondsToGo" },
         { "displayFlash" }
     },
@@ -306,12 +313,7 @@ const TestVector table[] =
         { "fiveSecondsPassed" },
         { "rapidBeep" }
     },
-    {
-        "Shower running + timer expired -> Lockout",
-        { "startButton", "showerHot" }, // get to test state
-        { "showerTimerExpired" },
-        { "redLedFlashing", "valveClosed", "showLockoutTime" }
-    },
+
     {
         "Shower running + dongle in -> Override",
         { "startButton", "showerHot" }, // get to test state
@@ -385,12 +387,12 @@ const TestVector table[] =
           "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
           "lockoutTimerExpired", "reset" },
         {  }
-    },
+    }
 };
 
 TEST_CASE("Table driven FSM test")
 {
-    for (const auto& v : table)
+    for (const auto& v : stateTests)
     {
         SECTION(v.testName)
         {
@@ -400,24 +402,44 @@ TEST_CASE("Table driven FSM test")
 }
 
 
-/*
+const TestVector useCaseTests[] =
+{
+    {
+        "Normal use, finishing before timer expires",
+        { },
+        { // start
+          "startButton", "showerHot",
+          // time passes during shower
+          "fiveMinutesToGo", "oneMinuteToGo",
+          "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
+          // stop
+          "showerCold",
+          // more time passes
+          "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
+          "tenSecondsToGo", "fiveSecondsPassed",
+          "showerTimerExpired", "lockoutTimerExpired" },
+        {
+            // start
+            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
+            // showering
+            "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep",
+            "shortBeep",
+            "longBeep", "showFinalCountdown",
+            "shortBeep", "shortBeep", "shortBeep",
+            "displayFlash",
+            "redLedFlashing", "valveClosed", "showLockoutTime",
+            "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
+        }
+    }
+};
 
-All events:
-
-    "startButton",
-    "coldTimerExpired",
-    "showerHot",
-    "showerCold",
-    "fiveMinutesToGo",
-    "oneMinuteToGo",
-    "fiveSecondsPassed",
-    "tenSecondsToGo",
-    "showerTimerExpired",
-    "dongleIn",
-    "dongleOut",
-    "reset",
-    "plusButton",
-    "minusButton",
-    "lockoutTimerExpired",
-
- */
+TEST_CASE("Table driven use case tests")
+{
+    for (const auto& v : useCaseTests)
+    {
+        SECTION(v.testName)
+        {
+            apply(v);
+        }
+    }
+}
