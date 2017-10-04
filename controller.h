@@ -55,6 +55,10 @@ public:
         {
             state = showerOffStillTiming;
         }
+        if (state == showerRunningFinalCountdown)
+        {
+            state = showerOffStillTimingFinalCountdown;
+        }
     }
 
     virtual void fiveMinutesToGo()

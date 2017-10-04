@@ -102,21 +102,23 @@ struct TestVector
 
 void apply(Controller& uut, std::string event)
 {
-    if (event == "startButton")         uut.startButton();
-    if (event == "coldTimerExpired")    uut.coldTimerExpired();
-    if (event == "showerHot")           uut.showerHot();
-    if (event == "showerCold")          uut.showerCold();
-    if (event == "fiveMinutesToGo")     uut.fiveMinutesToGo();
-    if (event == "oneMinuteToGo")       uut.oneMinuteToGo();
-    if (event == "fiveSecondsPassed")   uut.fiveSecondsPassed();
-    if (event == "tenSecondsToGo")      uut.tenSecondsToGo();
-    if (event == "showerTimerExpired")  uut.showerTimerExpired();
-    if (event == "dongleIn")            uut.dongleIn();
-    if (event == "dongleOut")           uut.dongleOut();
-    if (event == "reset")               uut.reset();
-    if (event == "plusButton")          uut.plusButton();
-    if (event == "minusButton")         uut.minusButton();
-    if (event == "lockoutTimerExpired") uut.lockoutTimerExpired();
+    if (event == "startButton")         { uut.startButton(); return; }
+    if (event == "coldTimerExpired")    { uut.coldTimerExpired(); return; }
+    if (event == "showerHot")           { uut.showerHot(); return; }
+    if (event == "showerCold")          { uut.showerCold(); return; }
+    if (event == "fiveMinutesToGo")     { uut.fiveMinutesToGo(); return; }
+    if (event == "oneMinuteToGo")       { uut.oneMinuteToGo(); return; }
+    if (event == "fiveSecondsPassed")   { uut.fiveSecondsPassed(); return; }
+    if (event == "tenSecondsToGo")      { uut.tenSecondsToGo(); return; }
+    if (event == "showerTimerExpired")  { uut.showerTimerExpired(); return; }
+    if (event == "dongleIn")            { uut.dongleIn(); return; }
+    if (event == "dongleOut")           { uut.dongleOut(); return; }
+    if (event == "reset")               { uut.reset(); return; }
+    if (event == "plusButton")          { uut.plusButton(); return; }
+    if (event == "minusButton")         { uut.minusButton(); return; }
+    if (event == "lockoutTimerExpired") { uut.lockoutTimerExpired(); return; }
+
+    FAIL("unknown event: " + event);
 }
 
 void apply(const TestVector& v)
@@ -272,8 +274,8 @@ const TestVector stateTests[] =
         { "displayFlash" }
     },
     {
-        "Shower running + then off + 10 secs to go + 5 sec passed -> no beep",
-        { "startButton", "showerHot", "showerCold", "tenSecondsToGo" }, // get to test state
+        "Shower running + then off + 1 min to go + 10 secs to go + 5 sec passed -> no beep",
+        { "startButton", "showerHot", "showerCold", "oneMinuteToGo", "tenSecondsToGo" }, // get to test state
         { "fiveSecondsPassed" },
         { }
     },
@@ -302,8 +304,8 @@ const TestVector stateTests[] =
         { "shortBeep" }
     },
     {
-        "Shower running + then off then on again, 10 secs to go -> warnings",
-        { "startButton", "showerHot", "showerCold", "showerHot" }, // get to test state
+        "Shower running + then off then on again, 1 min to go + 10 secs to go -> warnings",
+        { "startButton", "showerHot", "showerCold", "showerHot", "oneMinuteToGo" }, // get to test state
         { "tenSecondsToGo" },
         { "rapidBeep", "displayFlash" }
     },
@@ -405,19 +407,46 @@ TEST_CASE("Table driven FSM test")
 const TestVector useCaseTests[] =
 {
     {
-        "Normal use, finishing before timer expires",
+        "Normal use, timing out",
         { },
-        { // start
-          "startButton", "showerHot",
-          // time passes during shower
-          "fiveMinutesToGo", "oneMinuteToGo",
-          "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
-          // stop
-          "showerCold",
-          // more time passes
-          "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
-          "tenSecondsToGo", "fiveSecondsPassed",
-          "showerTimerExpired", "lockoutTimerExpired" },
+        {
+            // start
+            "startButton", "showerHot",
+            // time passes during shower
+            "fiveMinutesToGo", "oneMinuteToGo",
+            "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
+            "tenSecondsToGo", "fiveSecondsPassed",
+            "showerTimerExpired", "lockoutTimerExpired"
+        },
+        {
+            // start
+            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
+            // showering
+            "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep",
+            "shortBeep",
+            "longBeep", "showFinalCountdown",
+            "shortBeep", "shortBeep", "shortBeep",
+            "rapidBeep", "displayFlash", "rapidBeep",
+            "redLedFlashing", "valveClosed", "showLockoutTime",
+            "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
+        }
+    },
+    {
+        "Normal use, finishing just before timer expires",
+        { },
+        {
+            // start
+            "startButton", "showerHot",
+            // time passes during shower
+            "fiveMinutesToGo", "oneMinuteToGo",
+            "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
+            // stop
+            "showerCold",
+            // more time passes
+            "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
+            "tenSecondsToGo", "fiveSecondsPassed",
+            "showerTimerExpired", "lockoutTimerExpired"
+        },
         {
             // start
             "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
@@ -430,7 +459,42 @@ const TestVector useCaseTests[] =
             "redLedFlashing", "valveClosed", "showLockoutTime",
             "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
         }
-    }
+    },
+    {
+        "Turn on cold for a few minutes",
+        { },
+        { "startButton", "coldTimerExpired" },
+        {
+            // start
+            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
+            // cold timer expired
+            "shortBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
+        }
+    },
+    {
+        "Normal use, time set for less than 5 mins, timing out",
+        { },
+        {
+            // start
+            "startButton", "showerHot",
+            // time passes during shower
+            "oneMinuteToGo",
+            "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
+            "tenSecondsToGo", "fiveSecondsPassed",
+            "showerTimerExpired", "lockoutTimerExpired"
+        },
+        {
+            // start
+            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
+            // showering
+            "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep",
+            "longBeep", "showFinalCountdown",
+            "shortBeep", "shortBeep", "shortBeep",
+            "rapidBeep", "displayFlash", "rapidBeep",
+            "redLedFlashing", "valveClosed", "showLockoutTime",
+            "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
+        }
+    },
 };
 
 TEST_CASE("Table driven use case tests")
