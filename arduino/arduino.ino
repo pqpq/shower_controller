@@ -41,15 +41,7 @@ const int digitMapping[10] =
   0b1101111     // 9
 };
 
-//     _  _     _  _     _  _     _  _     _  _     _  _ 
-//    |   _|   |  | |   | |  |   |_   |   |    |   |    |
-//    |_  _|   |_  _|   |_  _|   |_  _|   |_| _|   |_ |_|
-const int spinnerMapping[]=
-{
-  
-};
-
-void write7seg(int bits)
+void write7seg(int bits, bool showDot)
 {
   digitalWrite(SEG_A, bits & 0b0000001 ? LOW : HIGH);
   digitalWrite(SEG_B, bits & 0b0000010 ? LOW : HIGH);
@@ -58,12 +50,10 @@ void write7seg(int bits)
   digitalWrite(SEG_E, bits & 0b0010000 ? LOW : HIGH);
   digitalWrite(SEG_F, bits & 0b0100000 ? LOW : HIGH);
   digitalWrite(SEG_G, bits & 0b1000000 ? LOW : HIGH);
-
-  // Always on for now...
-  digitalWrite(SEG_DOT, LOW);
+  digitalWrite(SEG_DOT, showDot ? LOW : HIGH);
 }
 
-void writeDigit(int digit, int value)
+void writeDigit(int digit, int value, bool showDot)
 {
   if (digit == 0)
   {
@@ -74,19 +64,28 @@ void writeDigit(int digit, int value)
     digitalWrite(LATCH1_ENABLE, HIGH);
   }
 
-  if (digit == 1 && value == 0)
+  if (digit == 1 && (value == 0 || value > 9))
   {
-    write7seg(0);
+    write7seg(0, false);
   }
   else
   {
-    write7seg(digitMapping[value]);
+    const int bits = (value < 10) ? digitMapping[value] : 0;
+    write7seg(bits, showDot);
   }
   
   digitalWrite(LATCH0_ENABLE, LOW);
   digitalWrite(LATCH1_ENABLE, LOW);
+}
 
-  //write7seg(0b0100000);
+void displayNumber(int n, bool showDot)
+{
+  const int digitOff = 99;
+  
+  const int tens = n < 100 ? n / 10 : digitOff;
+  const int units = n < 100 ? n % 10 : digitOff;
+  writeDigit(1, tens, showDot);
+  writeDigit(0, units, showDot);
 }
 
 void displayDim()
@@ -113,6 +112,7 @@ void setup()
   pinMode(SEG_E, OUTPUT);
   pinMode(SEG_F, OUTPUT);
   pinMode(SEG_G, OUTPUT);
+  pinMode(SEG_DOT, OUTPUT);
 
   // latch enables
   pinMode(LATCH0_ENABLE, OUTPUT);
@@ -121,7 +121,7 @@ void setup()
   // output enable (LED dimmer)
   pinMode(LEDS_OE, OUTPUT);
 
-  write7seg(0);
+  write7seg(0, false);
 
   digitalWrite(LATCH0_ENABLE, LOW);
   digitalWrite(LATCH1_ENABLE, LOW);
@@ -130,26 +130,33 @@ void setup()
 
 
 int n = 0;
+int d = 0;
+bool dot = true;
 
 void loop()
 {
-  writeDigit(0, n % 10);
-  writeDigit(1, n / 10);
+  displayNumber(n, dot);
   ++n;
-  if (n > 99)
+  if (n > 110)
   {
     n = 0;
+  }
+
+  // demonstrate separate control of the dot
+  if (d++ > 10)
+  {
+    d = 0;
+    dot = !dot;
+    digitalWrite(LED_BUILTIN, dot ? HIGH : LOW);
   }
 
   // demonstrate PWM dimming
   if (n/10 % 2)
   {
-    digitalWrite(LED_BUILTIN, HIGH);
     displayDim();
   }
   else
   {
-    digitalWrite(LED_BUILTIN, LOW);
     displayBright();
   }
 
