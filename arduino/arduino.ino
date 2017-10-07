@@ -1,4 +1,38 @@
 
+// Analogue input button normally pulled low, with the button shorting
+// the input to Vcc
+struct Button
+{
+  // 0-5v reads 0 - 1024, so just need something reasonable to
+  // tell when the press has pulled the input up
+  static const int senseThreshold = 800;
+
+  // Number of consecutive reads before declaring a press
+  static const int debounceCount = 10;
+
+  Button(int pin) : pin(pin), debounce(0) {}
+
+  bool check()
+  {
+    const bool definitelyPressed = debounce > debounceCount;
+    const bool maybePressed = analogRead(pin) > senseThreshold;
+    if (maybePressed && !definitelyPressed)
+    {
+      debounce++;
+    }
+    else
+    {
+      debounce = 0;
+    }
+
+    return definitelyPressed;
+  }
+
+  const int pin;
+  int debounce;
+};
+
+
 #define SEG_A         (3)
 #define SEG_B         (4)
 #define SEG_C         (0)
@@ -15,17 +49,21 @@
 
 #define BUZZER_PWM    (6)   // 980 Hz PWM output on this pin
 
-//       a/3
-//      *****
-//     *     *
-// f/2 *     * b/4
-//     *     *
-//      *****
-//     * g/5 *
-// e/6 *     * c/0
-//     *     *
-//      *****
-//       d/1
+#define START_BUTTON  (A0)
+#define PLUS_BUTTON   (A1)
+#define MINUS_BUTTON  (A2)
+
+
+Button startButton(START_BUTTON);
+Button plusButton(PLUS_BUTTON);
+Button minusButton(MINUS_BUTTON);
+
+// The 7 segments are
+//    a
+//  f   b
+//    g
+//  e   c
+//    d
 const int digitMapping[10] =
 {
   //gfedcba
@@ -129,26 +167,18 @@ void setup()
 }
 
 
-int n = 0;
-int d = 0;
-bool dot = true;
+int n = 50;
 
 void loop()
 {
-  displayNumber(n, dot);
-  ++n;
-  if (n > 110)
-  {
-    n = 0;
-  }
+  const bool start = startButton.check();
+  const bool plus = plusButton.check();
+  const bool minus = minusButton.check();
 
-  // demonstrate separate control of the dot
-  if (d++ > 10)
-  {
-    d = 0;
-    dot = !dot;
-    digitalWrite(LED_BUILTIN, dot ? HIGH : LOW);
-  }
+  if (plus) n++;
+  else if (minus) n--;
+
+  displayNumber(n, start);
 
   // demonstrate PWM dimming
   if (n/10 % 2)
@@ -160,5 +190,5 @@ void loop()
     displayBright();
   }
 
-  delay(300);
+  delay(10);
 }
