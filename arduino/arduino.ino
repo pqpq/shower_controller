@@ -3,14 +3,17 @@
 #define SEG_B         (4)
 #define SEG_C         (0)
 #define SEG_D         (1)
-#define SEG_E         (6)
+#define SEG_E         (7)
 #define SEG_F         (2)
 #define SEG_G         (5)
+#define SEG_DOT       (8)
 
-#define LATCH0_ENABLE (7)
-#define LATCH1_ENABLE (8)
+#define LATCH0_ENABLE (9)
+#define LATCH1_ENABLE (10)
 
-#define LEDS_OE       (9)
+#define LEDS_OE       (11)
+
+#define BUZZER_PWM    (6)   // 980 Hz PWM output on this pin
 
 //       a/3
 //      *****
@@ -55,6 +58,9 @@ void write7seg(int bits)
   digitalWrite(SEG_E, bits & 0b0010000 ? LOW : HIGH);
   digitalWrite(SEG_F, bits & 0b0100000 ? LOW : HIGH);
   digitalWrite(SEG_G, bits & 0b1000000 ? LOW : HIGH);
+
+  // Always on for now...
+  digitalWrite(SEG_DOT, LOW);
 }
 
 void writeDigit(int digit, int value)
@@ -147,5 +153,5 @@ void loop()
     displayBright();
   }
 
-  delay(100);
+  delay(300);
 }
