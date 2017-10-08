@@ -25,34 +25,31 @@ class TestActions : public Actions
 public:
     TestActions() { reset(); }
 
-    virtual void valveClosed()      { _calls.push_back("valveClosed"); }
-    virtual void valveOpen()        { _calls.push_back("valveOpen"); }
+    virtual void valveClosed()          { _calls.push_back("valveClosed"); }
+    virtual void valveOpen()            { _calls.push_back("valveOpen"); }
 
-    virtual void greenLedOn()       { _calls.push_back("greenLedOn"); }
-    virtual void greenLedOff()      { _calls.push_back("greenLedOff"); }
-    virtual void greenLedFlashing() { _calls.push_back("greenLedFlashing"); }
-    virtual void redLedFlashing()   { _calls.push_back("redLedFlashing"); }
-    virtual void alternateLedsFlashing() { _calls.push_back("alternateLedsFlashing"); }
+    virtual void ledOn()                { _calls.push_back("ledOn"); }
+    virtual void ledFlashing()          { _calls.push_back("ledFlashing"); }
 
-    virtual void showShowerTime()   { _calls.push_back("showShowerTime"); }
-    virtual void showFinalCountdown(){ _calls.push_back("showFinalCountdown"); }
-    virtual void showLockoutTime()  { _calls.push_back("showLockoutTime"); }
-    virtual void displayDim()       { _calls.push_back("displayDim"); }
-    virtual void displayBright()    { _calls.push_back("displayBright"); }
-    virtual void displayFlash()     { _calls.push_back("displayFlash"); }
+    virtual void showShowerTime()       { _calls.push_back("showShowerTime"); }
+    virtual void showFinalCountdown()   { _calls.push_back("showFinalCountdown"); }
+    virtual void showLockoutTime()      { _calls.push_back("showLockoutTime"); }
+    virtual void displayOff()           { _calls.push_back("displayOff"); }
+    virtual void displayOn()            { _calls.push_back("displayOn"); }
+    virtual void displayFlash()         { _calls.push_back("displayFlash"); }
+    virtual void displayPulse()         { _calls.push_back("displayPulse"); }
 
-    virtual void shortBeep()        { _calls.push_back("shortBeep"); }
-    virtual void longBeep()         { _calls.push_back("longBeep"); }
-    virtual void rapidBeep()        { _calls.push_back("rapidBeep"); }
+    virtual void shortBeep()            { _calls.push_back("shortBeep"); }
+    virtual void longBeep()             { _calls.push_back("longBeep"); }
+    virtual void rapidBeeps()           { _calls.push_back("rapidBeeps"); }
 
-    virtual void coldTimerStart()   { _calls.push_back("coldTimerStart"); }
-    virtual void coldTimerStop()    { _calls.push_back("coldTimerStop"); }
-    virtual void showerTimerStart() { _calls.push_back("showerTimerStart"); }
-    virtual void lockoutTimerStart(){ _calls.push_back("lockoutTimerStart"); }
+    virtual void showTimerStart()       { _calls.push_back("showTimerStart"); }
+    virtual void showerTimerStart()     { _calls.push_back("showerTimerStart"); }
+    virtual void lockoutTimerStart()    { _calls.push_back("lockoutTimerStart"); }
 
-    virtual void timeAdd()          { _calls.push_back("timeAdd"); }
-    virtual void timeRemove()       { _calls.push_back("timeRemove"); }
-    virtual void timeSave()         { _calls.push_back("timeSave"); }
+    virtual void timeAdd()              { _calls.push_back("timeAdd"); }
+    virtual void timeRemove()           { _calls.push_back("timeRemove"); }
+    virtual void timeSave()             { _calls.push_back("timeSave"); }
 
     void reset()
     {
@@ -102,21 +99,22 @@ struct TestVector
 
 void apply(Controller& uut, std::string event)
 {
-    if (event == "startButton")         { uut.startButton(); return; }
-    if (event == "coldTimerExpired")    { uut.coldTimerExpired(); return; }
-    if (event == "showerHot")           { uut.showerHot(); return; }
-    if (event == "showerCold")          { uut.showerCold(); return; }
-    if (event == "fiveMinutesToGo")     { uut.fiveMinutesToGo(); return; }
-    if (event == "oneMinuteToGo")       { uut.oneMinuteToGo(); return; }
-    if (event == "fiveSecondsPassed")   { uut.fiveSecondsPassed(); return; }
-    if (event == "tenSecondsToGo")      { uut.tenSecondsToGo(); return; }
-    if (event == "showerTimerExpired")  { uut.showerTimerExpired(); return; }
+    if (event == "startButtonShort")    { uut.startButtonShort(); return; }
+    if (event == "startButtonLong")     { uut.startButtonLong(); return; }
+    if (event == "plusButton")          { uut.plusButton(); return; }
+    if (event == "minusButton")         { uut.minusButton(); return; }
+
     if (event == "dongleIn")            { uut.dongleIn(); return; }
     if (event == "dongleOut")           { uut.dongleOut(); return; }
     if (event == "reset")               { uut.reset(); return; }
-    if (event == "plusButton")          { uut.plusButton(); return; }
-    if (event == "minusButton")         { uut.minusButton(); return; }
+
+    if (event == "showTimerExpired")    { uut.showTimerExpired(); return; }
+    if (event == "showerTimerExpired")  { uut.showerTimerExpired(); return; }
     if (event == "lockoutTimerExpired") { uut.lockoutTimerExpired(); return; }
+    if (event == "fiveMinutesToGo")     { uut.fiveMinutesToGo(); return; }
+    if (event == "oneMinuteToGo")       { uut.oneMinuteToGo(); return; }
+    if (event == "tenSecondsToGo")      { uut.tenSecondsToGo(); return; }
+    if (event == "fiveSecondsPassed")   { uut.fiveSecondsPassed(); return; }
 
     FAIL("unknown event: " + event);
 }

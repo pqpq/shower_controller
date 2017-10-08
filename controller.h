@@ -15,21 +15,69 @@ public:
     Controller(Actions& a) : actions(a) { goToIdleNormal(); }
 
     // Events
-    void startButton() override final
+    void startButtonShort() override final
     {
         if (state == idle)
         {
             state = waterOn;
-            actions.greenLedOn();
-            actions.longBeep();
+            actions.displayOff();
+            actions.ledFlashing();
             actions.showShowerTime();
-            actions.displayBright();
-            actions.coldTimerStart();
             actions.valveOpen();
         }
     }
 
-    void coldTimerExpired() override final
+    void startButtonLong() override final
+    {
+        if (state == idle)
+        {
+            state = waterOn;
+            actions.displayOff();
+            actions.ledFlashing();
+            actions.showShowerTime();
+            actions.valveOpen();
+        }
+    }
+
+    virtual void plusButton()
+    {
+        if (state == override)
+        {
+            actions.shortBeep();
+            actions.timeAdd();
+        }
+    }
+
+    virtual void minusButton()
+    {
+        if (state == override)
+        {
+            actions.shortBeep();
+            actions.timeRemove();
+        }
+    }
+
+    virtual void dongleIn()
+    {
+        state = override;
+        actions.valveOpen();
+        actions.showShowerTime();
+    }
+
+    virtual void dongleOut()
+    {
+        goToIdleSpecial();
+    }
+
+    virtual void reset()
+    {
+        if (state != override)
+        {
+            goToIdleSpecial();
+        }
+    }
+
+    void showTimerExpired() override final
     {
         if (state != idle && state != override && state != lockout)
         {
@@ -37,27 +85,27 @@ public:
         }
     }
 
-    void showerHot() override final
+    virtual void showerTimerExpired()
     {
-        if (state == waterOn || state == showerOffStillTiming)
+        if (state == showerRunning ||
+            state == showerOffStillTiming ||
+            state == showerRunningFinalCountdown ||
+            state == showerOffStillTimingFinalCountdown ||
+            state == showerRunningVeryEnd ||
+            state == showerOffStillTimingVeryEnd)
         {
-            state = showerRunning;
-            actions.coldTimerStop();
-            actions.showerTimerStart();
-            actions.greenLedFlashing();
-            actions.shortBeep();
+            state = lockout;
+            actions.valveClosed();
+            actions.showLockoutTime();
         }
     }
 
-    virtual void showerCold()
+
+    virtual void lockoutTimerExpired()
     {
-        if (state == showerRunning)
+        if (state == lockout)
         {
-            state = showerOffStillTiming;
-        }
-        if (state == showerRunningFinalCountdown)
-        {
-            state = showerOffStillTimingFinalCountdown;
+            goToIdleNoBeep();
         }
     }
 
@@ -84,23 +132,11 @@ public:
         }
     }
 
-    virtual void fiveSecondsPassed()
-    {
-        if (state == showerRunningFinalCountdown)
-        {
-            actions.shortBeep();
-        }
-        if (state == showerRunningVeryEnd)
-        {
-            actions.rapidBeep();
-        }
-    }
-
     virtual void tenSecondsToGo()
     {
         if (state == showerRunning || state == showerRunningFinalCountdown)
         {
-            actions.rapidBeep();
+            actions.rapidBeeps();
             actions.displayFlash();
             state = showerRunningVeryEnd;
         }
@@ -111,68 +147,15 @@ public:
         }
     }
 
-    virtual void showerTimerExpired()
+    virtual void fiveSecondsPassed()
     {
-        if (state == showerRunning ||
-            state == showerOffStillTiming ||
-            state == showerRunningFinalCountdown ||
-            state == showerOffStillTimingFinalCountdown ||
-            state == showerRunningVeryEnd ||
-            state == showerOffStillTimingVeryEnd)
-        {
-            state = lockout;
-            actions.redLedFlashing();
-            actions.valveClosed();
-            actions.showLockoutTime();
-        }
-    }
-
-    virtual void dongleIn()
-    {
-        state = override;
-        actions.rapidBeep();
-        actions.alternateLedsFlashing();
-        actions.valveOpen();
-        actions.showShowerTime();
-        actions.displayBright();
-    }
-
-    virtual void dongleOut()
-    {
-        goToIdleSpecial();
-    }
-
-    virtual void reset()
-    {
-        if (state != override)
-        {
-            goToIdleSpecial();
-        }
-    }
-
-    virtual void plusButton()
-    {
-        if (state == override)
+        if (state == showerRunningFinalCountdown)
         {
             actions.shortBeep();
-            actions.timeAdd();
         }
-    }
-
-    virtual void minusButton()
-    {
-        if (state == override)
+        if (state == showerRunningVeryEnd)
         {
-            actions.shortBeep();
-            actions.timeRemove();
-        }
-    }
-
-    virtual void lockoutTimerExpired()
-    {
-        if (state == lockout)
-        {
-            goToIdleNoBeep();
+            actions.rapidBeeps();
         }
     }
 
@@ -198,10 +181,8 @@ private:
     void goToIdleNoBeep()
     {
         state = idle;
-        actions.greenLedOn();
         actions.valveClosed();
         actions.showShowerTime();
-        actions.displayDim();
     }
 
     void goToIdleNormal()
@@ -216,7 +197,7 @@ private:
         {
             actions.timeSave();
         }
-        actions.rapidBeep();
+        actions.rapidBeeps();
         goToIdleNoBeep();
     }
 };

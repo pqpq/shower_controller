@@ -11,8 +11,12 @@ public:
 
     // Push buttons
 
-    /// The "start" pushbutton that tells us the user wants to start the shower.
-    virtual void startButton() = 0;
+    /// A short press of the "start" pushbutton.
+    virtual void startButtonShort() = 0;
+
+    /// A long press of the "start" pushbutton that tells us the user wants to
+    /// start the shower, or cancel the warnings when they have finished.
+    virtual void startButtonLong() = 0;
 
     /// The '+' pushbutton that adds time when the dongle is plugged in.
     virtual void plusButton() = 0;
@@ -22,12 +26,6 @@ public:
 
 
     // External hardware interface
-
-    /// Significant current has been detected, so the shower heater is on.
-    virtual void showerHot() = 0;
-
-    /// Shower heater current has stopped, so the shower is off or cold.
-    virtual void showerCold() = 0;
 
     /// The override dongle has been plugged in.
     virtual void dongleIn() = 0;
@@ -41,9 +39,9 @@ public:
 
     // Internal timers
 
-    /// The cold timer has expired. This allows the shower to be run cold for
-    /// cleaning etc. without risking a lockout.
-    virtual void coldTimerExpired() = 0;
+    /// The "show time" timer has expired.
+    /// This briefly shows the timer time, when the unit is idle.
+    virtual void showTimerExpired() = 0;
 
     /// The shower timer has expired.
     /// Turn off the shower and prevent another shower for a while.
