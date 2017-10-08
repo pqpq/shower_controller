@@ -19,23 +19,25 @@ public:
     {
         if (state == idle)
         {
-            state = waterOn;
-            actions.displayOff();
-            actions.ledFlashing();
+            state = showingTime;
+            actions.showTimerStart();
             actions.showShowerTime();
-            actions.valveOpen();
+            actions.displayOn();
+            actions.shortBeep();
         }
     }
 
     void startButtonLong() override final
     {
-        if (state == idle)
+        if (state == idle || state == showingTime)
         {
-            state = waterOn;
-            actions.displayOff();
-            actions.ledFlashing();
-            actions.showShowerTime();
+            state = on;
             actions.valveOpen();
+            actions.longBeep();
+            actions.showShowerTime();
+            actions.displayOn();
+            actions.showerTimerStart();
+            actions.ledFlashing();
         }
     }
 
@@ -60,8 +62,11 @@ public:
     virtual void dongleIn()
     {
         state = override;
-        actions.valveOpen();
+        actions.rapidBeeps();
+        actions.ledFlashing();
         actions.showShowerTime();
+        actions.displayPulse();
+        actions.valveOpen();
     }
 
     virtual void dongleOut()
@@ -79,9 +84,9 @@ public:
 
     void showTimerExpired() override final
     {
-        if (state != idle && state != override && state != lockout)
+        if (state == showingTime)
         {
-            goToIdleNormal();
+            goToIdleNoBeep();
         }
     }
 
@@ -164,7 +169,8 @@ private:
     enum State
     {
         idle,
-        waterOn,
+        on,
+        showingTime,
         showerRunning,
         showerRunningFinalCountdown,
         showerRunningVeryEnd,
@@ -181,8 +187,9 @@ private:
     void goToIdleNoBeep()
     {
         state = idle;
+        actions.displayOff();
+        actions.ledFlashing();
         actions.valveClosed();
-        actions.showShowerTime();
     }
 
     void goToIdleNormal()

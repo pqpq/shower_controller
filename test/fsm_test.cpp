@@ -80,12 +80,12 @@ TEST_CASE("Check a new instance puts the hardware in the right state")
     TestActions ta;
     const Controller uut(ta);
 
-    REQUIRE(ta.n("greenLedOn") == 1);
-    REQUIRE(ta.n("valveClosed") == 1);
-    REQUIRE(ta.n("showShowerTime") == 1);
-    REQUIRE(ta.n("displayDim") == 1);
     REQUIRE(ta.n("shortBeep") == 1);
-    CHECK(ta.calls().size() == 5);
+    REQUIRE(ta.n("displayOff") == 1);
+    REQUIRE(ta.n("ledFlashing") == 1);
+    REQUIRE(ta.n("valveClosed") == 1);
+    // Check no other calls
+    CHECK(ta.calls().size() == 4);
 }
 
 
@@ -144,31 +144,77 @@ const TestVector stateTests[] =
 {
     // Idle state
     {
-        "Init (Idle) + Start -> Water On",
+        "Init (Idle) + short start button -> Show time",
         { },
-        { "startButton" },
-        { "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen" }
+        { "startButtonShort" },
+        { "showTimerStart", "showShowerTime", "displayOn", "shortBeep" }
     },
     {
-        "Init (Idle) + reset -> stay in idle, feedback that reset occurred",
+        "Init (Idle) + long start button -> Water On",
         { },
-        { "reset" },
-        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+        { "startButtonLong" },
+        { "valveOpen", "longBeep", "showShowerTime", "displayOn", "showerTimerStart", "ledFlashing" }
     },
     {
         "Init (Idle) + dongle in -> Override",
         { },
         { "dongleIn" },
-        { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
+        { "rapidBeeps", "ledFlashing", "showShowerTime", "displayPulse", "valveOpen" }
+    },
+    {
+        "Init (Idle) + reset -> stay in idle, feedback that reset occurred",
+        { },
+        { "reset" },
+        { "rapidBeeps", "displayOff", "ledFlashing", "valveClosed" }
     },
     {
         "Init (Idle) + events that should be ignored -> no effect",
         { },
-        { "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo", "oneMinuteToGo",
-          "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton" },
+        {
+            "plusButton", "minusButton", "showTimerExpired", "showerTimerExpired",
+            "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
+            "tenSecondsToGo", "fiveSecondsPassed"
+        },
         { }
     },
 
+    // Showing time state
+    {
+        "Showing time + show timer expired -> Idle",
+        { "startButtonShort" },
+        { "showTimerExpired" },
+        { "displayOff", "ledFlashing", "valveClosed" }
+    },
+    {
+        "Showing time + long start button -> Water On",
+        { "startButtonShort" },
+        { "startButtonLong" },
+        { "valveOpen", "longBeep", "showShowerTime", "displayOn", "showerTimerStart", "ledFlashing" }
+    },
+    {
+        "Showing time + dongle -> Override",
+        { "startButtonShort" },
+        { "dongleIn" },
+        { "rapidBeeps", "ledFlashing", "showShowerTime", "displayPulse", "valveOpen" }
+    },
+    {
+        "Showing time + reset -> Idle",
+        { "startButtonShort" },
+        { "reset" },
+        { "rapidBeeps", "displayOff", "ledFlashing", "valveClosed" }
+    },
+    {
+        "Showing time + events that should be ignored -> no effect",
+        { "startButtonShort" },
+        {
+            "startButtonShort", "plusButton", "minusButton", "showerTimerExpired",
+            "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
+            "tenSecondsToGo", "fiveSecondsPassed"
+        },
+        { }
+    }
+
+    /*
     // Water On state
     {
         "Water On + cold timer expired -> idle",
@@ -388,6 +434,7 @@ const TestVector stateTests[] =
           "lockoutTimerExpired", "reset" },
         {  }
     }
+    */
 };
 
 TEST_CASE("Table driven FSM test")
@@ -501,7 +548,28 @@ TEST_CASE("Table driven use case tests")
     {
         SECTION(v.testName)
         {
-            apply(v);
+            //apply(v);
         }
     }
 }
+
+
+// all events
+/*
+
+"startButtonShort",
+"startButtonLong",
+"plusButton",
+"minusButton",
+"dongleIn",
+"dongleOut",
+"reset",
+"showTimerExpired",
+"showerTimerExpired",
+"lockoutTimerExpired",
+"fiveMinutesToGo",
+"oneMinuteToGo",
+"tenSecondsToGo",
+"fiveSecondsPassed"
+
+ */
