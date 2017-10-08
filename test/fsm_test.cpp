@@ -173,7 +173,7 @@ const TestVector stateTests[] =
         {
             "plusButton", "minusButton", "showTimerExpired", "showerTimerExpired",
             "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
-            "oneSecondPassed", "fiveSecondsPassed"
+            "fiveSecondsPassed", "oneSecondPassed"
         },
         { }
     },
@@ -209,7 +209,7 @@ const TestVector stateTests[] =
         {
             "startButtonShort", "plusButton", "minusButton", "showerTimerExpired",
             "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
-            "oneSecondPassed", "fiveSecondsPassed"
+            "fiveSecondsPassed", "oneSecondPassed"
         },
         { }
     },
@@ -287,6 +287,9 @@ const TestVector stateTests[] =
         { "showerTimerExpired" },
         { "ledOn", "valveClosed", "showLockoutTime", "displayFlash" }
     },
+
+    /// @todo ignored events?
+
 /*
     // Water on state - shower off before end
     {
@@ -374,34 +377,49 @@ const TestVector stateTests[] =
         { "startButton", "plusButton", "minusButton", "lockoutTimerExpired" },
         { }
     },
-
+*/
     // Lockout state
     {
+        "Lockout + short start button -> error beeps",
+        { "startButtonLong", "showerTimerExpired" },
+        { "startButtonShort" },
+        { "rapidBeeps" }
+    },
+    {
+        "Lockout + long start button -> error beeps",
+        { "startButtonLong", "showerTimerExpired" },
+        { "startButtonLong" },
+        { "rapidBeeps" }
+    },
+    {
         "Lockout + lockout timer expired -> idle",
-        { "startButton", "showerTimerExpired" },
+        { "startButtonLong", "showerTimerExpired" },
         { "lockoutTimerExpired" },
-        { "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+        { "displayOff", "ledFlashing", "valveClosed" }
     },
     {
         "Lockout + dongle in -> Override",
-        { "startButton", "showerTimerExpired" },
+        { "startButtonLong", "showerTimerExpired" },
         { "dongleIn" },
-        { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
+        { "rapidBeeps", "ledFlashing", "showShowerTime", "displayPulse", "valveOpen" }
     },
     {
         "Lockout + reset -> idle",
-        { "startButton", "showerTimerExpired" },
+        { "startButtonLong", "showerTimerExpired" },
         { "reset" },
-        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+        { "rapidBeeps", "displayOff", "ledFlashing", "valveClosed" }
     },
     {
         "Lockout + events that should be ignored -> no effect",
-        { "startButton", "showerTimerExpired" },
-        { "startButton", "coldTimerExpired", "showerCold", "fiveMinutesToGo",
-          "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
-          "plusButton", "minusButton" },
+        { "startButtonLong", "showerTimerExpired" },
+        {
+            "plusButton", "minusButton", "showTimerExpired", "showerTimerExpired",
+            "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed",
+            "oneSecondPassed"
+        },
         { }
     },
+/*
 
     // Override state
     {
@@ -565,7 +583,7 @@ TEST_CASE("Table driven use case tests")
 "lockoutTimerExpired",
 "fiveMinutesToGo",
 "oneMinuteToGo",
-"tenSecondsToGo",
 "fiveSecondsPassed"
+"oneSecondPassed",
 
  */

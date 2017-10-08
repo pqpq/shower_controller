@@ -25,7 +25,7 @@ public:
             actions.displayOn();
             actions.shortBeep();
         }
-        if (state == on)
+        if (state == on || state == lockout)
         {
             actions.rapidBeeps();
         }
@@ -47,6 +47,10 @@ public:
             actions.displayOn();
             actions.showerTimerStart();
             actions.ledFlashing();
+        }
+        if (state == lockout)
+        {
+            actions.rapidBeeps();
         }
     }
 
@@ -108,7 +112,7 @@ public:
 //            state == showerRunningVeryEnd ||
 //            state == showerOffStillTimingVeryEnd)
         {
-//            state = lockout;
+            state = lockout;
             actions.ledOn();
             actions.valveClosed();
             actions.showLockoutTime();
@@ -119,10 +123,10 @@ public:
 
     virtual void lockoutTimerExpired()
     {
-//        if (state == lockout)
-//        {
-//            goToIdleNoBeep();
-//        }
+        if (state == lockout)
+        {
+            goToIdleNoBeep();
+        }
     }
 
     virtual void fiveMinutesToGo()
