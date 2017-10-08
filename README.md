@@ -46,17 +46,19 @@ Arduino Uno has:
 * 14 DIO
 * 6 A/D in
 
+Pin usage:
 * 13 out
-** 8 for 7seg 
-** 2 latch strobes
-** 1 output enable (PWM - dimmer)
-** 1 valve actuator
-** 1 PWM for buzzer
+    * 8 for 7seg
+    * 2 latch strobes
+    * 1 output enable (PWM - dimmer)
+    * 1 valve actuator
+    * 1 PWM for buzzer
+
 * 5 analogue in
-** 1 start button
-** 1 security
-** 2 change time (+, -)
-** 1 reset - reed relay
+    * 1 start button
+    * 1 security
+    * 2 change time (+, -)
+    * 1 reset - reed relay
 
 ## “UI”
 
@@ -99,6 +101,8 @@ Shower running ->
 
 Shower running, button press -> 3 rapid beeps
 
+Shower running, long press -> carry on but no beeps
+
 Shower running, 1 minute to go ->
 * display seconds
 * blinking LED
@@ -107,17 +111,14 @@ Shower running, 1 minute to go ->
 * short beep every 5 seconds
 * constant beeping last 10 seconds (short beep every second)
 
-Shower stops within time ->
-* as shower running, but no beeps
-
 Timer expires -> Lockout 
-* (doesn’t matter if shower is on or off)
 
 Lockout ->
 * solid LED
 * water valve closed
 * count down lockout in mins
 * display flashing
+* button press - 3 rapid beeps
 
 Lockout complete -> Idle 
 
