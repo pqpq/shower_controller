@@ -63,7 +63,7 @@ Pin usage:
 ## “UI”
 
 ### Concepts
-* Short beep to confirm every button press
+* Short beep to confirm every button press, or ...
 * 3 quick beeps for negative
 * Long beep to attract attention?
 * Always have some LED on so we know the unit is functioning.
@@ -101,7 +101,10 @@ Water On ->
 
 Water On, button press -> 3 rapid beeps
 
-Water On, long press -> long beep to confirm, carry on but no beeps
+Water On, long press -> Silent
+* long beep to confirm
+* as Water On, but no beeps
+* long press toggles back & forth Silent/On
 
 Water On, 1 minute to go ->
 * display seconds
