@@ -419,14 +419,13 @@ const TestVector stateTests[] =
         },
         { }
     },
-/*
 
     // Override state
     {
         "Override + dongle out -> Idle",
         { "dongleIn" },
         { "dongleOut" },
-        { "timeSave", "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+        { "timeSave", "rapidBeeps", "displayOff", "ledFlashing", "valveClosed" }
     },
     {
         "Override + plus Button -> increase time",
@@ -443,12 +442,13 @@ const TestVector stateTests[] =
     {
         "Override + events that should be ignored -> no effect",
         { "dongleIn" },
-        { "startButton", "coldTimerExpired", "showerCold", "fiveMinutesToGo",
-          "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
-          "lockoutTimerExpired", "reset" },
+        {
+            "startButtonShort", "startButtonLong", "reset", "showTimerExpired",
+            "showerTimerExpired", "lockoutTimerExpired", "fiveMinutesToGo",
+            "oneMinuteToGo", "fiveSecondsPassed", "oneSecondPassed"
+        },
         {  }
     }
-    */
 };
 
 TEST_CASE("Table driven FSM test")

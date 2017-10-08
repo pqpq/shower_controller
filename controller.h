@@ -56,20 +56,20 @@ public:
 
     virtual void plusButton()
     {
-//        if (state == override)
-//        {
-//            actions.shortBeep();
-//            actions.timeAdd();
-//        }
+        if (state == override)
+        {
+            actions.shortBeep();
+            actions.timeAdd();
+        }
     }
 
     virtual void minusButton()
     {
-//        if (state == override)
-//        {
-//            actions.shortBeep();
-//            actions.timeRemove();
-//        }
+        if (state == override)
+        {
+            actions.shortBeep();
+            actions.timeRemove();
+        }
     }
 
     virtual void dongleIn()
@@ -84,7 +84,7 @@ public:
 
     virtual void dongleOut()
     {
-//        goToIdleSpecial();
+        goToIdleSpecial();
     }
 
     virtual void reset()
