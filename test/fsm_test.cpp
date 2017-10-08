@@ -113,8 +113,8 @@ void apply(Controller& uut, std::string event)
     if (event == "lockoutTimerExpired") { uut.lockoutTimerExpired(); return; }
     if (event == "fiveMinutesToGo")     { uut.fiveMinutesToGo(); return; }
     if (event == "oneMinuteToGo")       { uut.oneMinuteToGo(); return; }
-    if (event == "tenSecondsToGo")      { uut.tenSecondsToGo(); return; }
     if (event == "fiveSecondsPassed")   { uut.fiveSecondsPassed(); return; }
+    if (event == "oneSecondPassed")     { uut.oneSecondPassed(); return; }
 
     FAIL("unknown event: " + event);
 }
@@ -173,7 +173,7 @@ const TestVector stateTests[] =
         {
             "plusButton", "minusButton", "showTimerExpired", "showerTimerExpired",
             "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
-            "tenSecondsToGo", "fiveSecondsPassed"
+            "oneSecondPassed", "fiveSecondsPassed"
         },
         { }
     },
@@ -209,172 +209,168 @@ const TestVector stateTests[] =
         {
             "startButtonShort", "plusButton", "minusButton", "showerTimerExpired",
             "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
-            "tenSecondsToGo", "fiveSecondsPassed"
+            "oneSecondPassed", "fiveSecondsPassed"
         },
         { }
-    }
+    },
 
-    /*
     // Water On state
     {
-        "Water On + cold timer expired -> idle",
-        { "startButton" }, // get to test state
-        { "coldTimerExpired" },
-        { "shortBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
+        "Water On + short start button -> error beeps",
+        { "startButtonLong" },
+        { "startButtonShort" },
+        { "rapidBeeps" }
     },
     {
-        "Water On + shower hot -> shower running",
-        { "startButton" }, // get to test state
-        { "showerHot" },
-        { "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep" }
+        "Water On + long start button -> Water on but no more beeps",
+        { "startButtonLong" },
+        { "startButtonLong" },
+        { "longBeep" }
     },
     {
         "Water On + dongle in -> Override",
-        { "startButton" }, // get to test state
+        { "startButtonLong" },
+        { "dongleIn" },
+        { "rapidBeeps", "ledFlashing", "showShowerTime", "displayPulse", "valveOpen" }
+    },
+    {
+        "Water on + reset -> idle",
+        { "startButtonLong" },
+        { "reset" },
+        { "rapidBeeps", "displayOff", "ledFlashing", "valveClosed" }
+    },
+    {
+        "Water on + 5 mins to go -> beep",
+        { "startButtonLong" },
+        { "fiveMinutesToGo" },
+        { "shortBeep" }
+    },
+    {
+        "Water on + 5 mins to go + 5 sec passed -> nothing",
+        { "startButtonLong", "fiveMinutesToGo" },
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Water on + 1 min to go -> warnings",
+        { "startButtonLong" },
+        { "oneMinuteToGo" },
+        { "showFinalCountdown", "displayPulse", "longBeep" }
+    },
+    {
+        "Water on + 1 min to go + 5 sec passed -> beep",
+        { "startButtonLong", "oneMinuteToGo" },
+        { "fiveSecondsPassed" },
+        { "shortBeep" }
+    },
+    {
+        "Water on, 1 min to go + 10 secs to go -> rapid beeps",
+        { "startButtonLong", "oneMinuteToGo" },
+        { "oneSecondPassed" },
+        { "rapidBeeps" }
+    },
+    {
+        "Water on, 1 min to go + 9 secs to go -> rapid beeps",
+        { "startButtonLong", "oneMinuteToGo" },
+        { "oneSecondPassed", "oneSecondPassed" },
+        { "rapidBeeps", "rapidBeeps" }
+    },
+    {
+        "Water on + timer expired -> Lockout",
+        { "startButtonLong" },
+        { "showerTimerExpired" },
+        { "ledOn", "valveClosed", "showLockoutTime", "displayFlash" }
+    },
+    {
+        "Water on, usual sequence + timer expired -> Lockout",
+        { "startButtonLong", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "oneSecondPassed" },
+        { "showerTimerExpired" },
+        { "ledOn", "valveClosed", "showLockoutTime", "displayFlash" }
+    },
+/*
+    // Water on state - shower off before end
+    {
+        "Water on + then off, 5 mins to go -> no beep",
+        { "startButton", "showerCold" },
+        { "fiveMinutesToGo" },
+        { }
+    },
+    {
+        "Water on + then off, 1 min to go -> no beep",
+        { "startButton", "showerCold" },
+        { "oneMinuteToGo" },
+        { "showFinalCountdown" }
+    },
+    {
+        "Water on + then off, 1 min to go + 5 sec passed -> no beep",
+        { "startButton", "showerCold", "oneMinuteToGo" },
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Water on + then off, 1 min to go + 10 secs to go -> warnings",
+        { "startButton", "showerCold", "oneMinuteToGo" },
+        { "tenSecondsToGo" },
+        { "displayFlash" }
+    },
+    {
+        "Water on + then off + 1 min to go + 10 secs to go + 5 sec passed -> no beep",
+        { "startButton", "showerCold", "oneMinuteToGo", "tenSecondsToGo" },
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Water on + then off then on again, 5 mins to go -> warnings",
+        { "startButton", "showerCold" },
+        { "fiveMinutesToGo" },
+        { "shortBeep" }
+    },
+    {
+        "Water on + then off then on again, 5 mins to go + 5 sec passed -> nothing",
+        { "startButton", "showerCold", "fiveMinutesToGo" },
+        { "fiveSecondsPassed" },
+        { }
+    },
+    {
+        "Water on + then off then on again, 1 min to go -> warnings",
+        { "startButton", "showerCold" },
+        { "oneMinuteToGo" },
+        { "longBeep", "showFinalCountdown" }
+    },
+    {
+        "Water on + then off then on again, 1 min to go + 5 sec passed -> beep",
+        { "startButton", "showerCold", "oneMinuteToGo" },
+        { "fiveSecondsPassed" },
+        { "shortBeep" }
+    },
+    {
+        "Water on + then off then on again, 1 min to go + 10 secs to go -> warnings",
+        { "startButton", "showerCold", "oneMinuteToGo" },
+        { "tenSecondsToGo" },
+        { "rapidBeep", "displayFlash" }
+    },
+    {
+        "Water on + then off then on again, 10 secs to go + 5 sec passed -> beep",
+        { "startButton", "showerCold", "tenSecondsToGo" },
+        { "fiveSecondsPassed" },
+        { "rapidBeep" }
+    },
+
+    {
+        "Water on + dongle in -> Override",
+        { "startButton" },
         { "dongleIn" },
         { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
     },
     {
         "Water on + reset -> idle",
-        { "startButton" }, // get to test state
+        { "startButton" },
         { "reset" },
         { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
-        "Water On + events that should be ignored -> no effect",
-        { "startButton" }, // get to test state
-        { "startButton", "showerCold", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed",
-          "tenSecondsToGo", "showerTimerExpired", "plusButton", "minusButton", "lockoutTimerExpired" },
-        { }
-    },
-
-    // Shower running state - normal sequence
-    {
-        "Shower running + 5 mins to go -> beep",
-        { "startButton", "showerHot" }, // get to test state
-        { "fiveMinutesToGo" },
-        { "shortBeep" }
-    },
-    {
-        "Shower running + 5 mins to go + 5 sec passed -> nothing",
-        { "startButton", "showerHot", "fiveMinutesToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { }
-    },
-    {
-        "Shower running + 1 min to go -> warnings",
-        { "startButton", "showerHot" }, // get to test state
-        { "oneMinuteToGo" },
-        { "longBeep", "showFinalCountdown" }
-    },
-    {
-        "Shower running + 1 min to go + 5 sec passed -> beep",
-        { "startButton", "showerHot", "oneMinuteToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { "shortBeep" }
-    },
-    {
-        "Shower running, 1 min to go + 10 secs to go -> warnings",
-        { "startButton", "showerHot", "oneMinuteToGo" }, // get to test state
-        { "tenSecondsToGo" },
-        { "rapidBeep", "displayFlash" }
-    },
-    {
-        "Shower running + 10 secs to go + 5 sec passed -> beep",
-        { "startButton", "showerHot", "tenSecondsToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { "rapidBeep" }
-    },
-    {
-        "Shower running + timer expired -> Lockout",
-        { "startButton", "showerHot" }, // get to test state
-        { "showerTimerExpired" },
-        { "redLedFlashing", "valveClosed", "showLockoutTime" }
-    },
-
-    // Shower running state - shower off before end
-    {
-        "Shower running + then off, 5 mins to go -> no beep",
-        { "startButton", "showerHot", "showerCold" }, // get to test state
-        { "fiveMinutesToGo" },
-        { }
-    },
-    {
-        "Shower running + then off, 1 min to go -> no beep",
-        { "startButton", "showerHot", "showerCold" }, // get to test state
-        { "oneMinuteToGo" },
-        { "showFinalCountdown" }
-    },
-    {
-        "Shower running + then off, 1 min to go + 5 sec passed -> no beep",
-        { "startButton", "showerHot", "showerCold", "oneMinuteToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { }
-    },
-    {
-        "Shower running + then off, 1 min to go + 10 secs to go -> warnings",
-        { "startButton", "showerHot", "showerCold", "oneMinuteToGo" }, // get to test state
-        { "tenSecondsToGo" },
-        { "displayFlash" }
-    },
-    {
-        "Shower running + then off + 1 min to go + 10 secs to go + 5 sec passed -> no beep",
-        { "startButton", "showerHot", "showerCold", "oneMinuteToGo", "tenSecondsToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { }
-    },
-    {
-        "Shower running + then off then on again, 5 mins to go -> warnings",
-        { "startButton", "showerHot", "showerCold", "showerHot" }, // get to test state
-        { "fiveMinutesToGo" },
-        { "shortBeep" }
-    },
-    {
-        "Shower running + then off then on again, 5 mins to go + 5 sec passed -> nothing",
-        { "startButton", "showerHot", "showerCold", "showerHot", "fiveMinutesToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { }
-    },
-    {
-        "Shower running + then off then on again, 1 min to go -> warnings",
-        { "startButton", "showerHot", "showerCold", "showerHot" }, // get to test state
-        { "oneMinuteToGo" },
-        { "longBeep", "showFinalCountdown" }
-    },
-    {
-        "Shower running + then off then on again, 1 min to go + 5 sec passed -> beep",
-        { "startButton", "showerHot", "showerCold", "showerHot", "oneMinuteToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { "shortBeep" }
-    },
-    {
-        "Shower running + then off then on again, 1 min to go + 10 secs to go -> warnings",
-        { "startButton", "showerHot", "showerCold", "showerHot", "oneMinuteToGo" }, // get to test state
-        { "tenSecondsToGo" },
-        { "rapidBeep", "displayFlash" }
-    },
-    {
-        "Shower running + then off then on again, 10 secs to go + 5 sec passed -> beep",
-        { "startButton", "showerHot", "showerCold", "showerHot", "tenSecondsToGo" }, // get to test state
-        { "fiveSecondsPassed" },
-        { "rapidBeep" }
-    },
-
-    {
-        "Shower running + dongle in -> Override",
-        { "startButton", "showerHot" }, // get to test state
-        { "dongleIn" },
-        { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
-    },
-    {
-        "Shower running + reset -> idle",
-        { "startButton", "showerHot" }, // get to test state
-        { "reset" },
-        { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
-    },
-    {
-        "Shower running + events that should be ignored -> no effect",
-        { "startButton", "showerHot" }, // get to test state
+        "Water on + events that should be ignored -> no effect",
+        { "startButton" },
         { "startButton", "plusButton", "minusButton", "lockoutTimerExpired" },
         { }
     },
@@ -382,26 +378,26 @@ const TestVector stateTests[] =
     // Lockout state
     {
         "Lockout + lockout timer expired -> idle",
-        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
+        { "startButton", "showerTimerExpired" },
         { "lockoutTimerExpired" },
         { "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
         "Lockout + dongle in -> Override",
-        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
+        { "startButton", "showerTimerExpired" },
         { "dongleIn" },
         { "rapidBeep", "alternateLedsFlashing", "valveOpen", "showShowerTime", "displayBright" }
     },
     {
         "Lockout + reset -> idle",
-        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
+        { "startButton", "showerTimerExpired" },
         { "reset" },
         { "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
         "Lockout + events that should be ignored -> no effect",
-        { "startButton", "showerHot", "showerTimerExpired" }, // get to test state
-        { "startButton", "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo",
+        { "startButton", "showerTimerExpired" },
+        { "startButton", "coldTimerExpired", "showerCold", "fiveMinutesToGo",
           "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
           "plusButton", "minusButton" },
         { }
@@ -410,26 +406,26 @@ const TestVector stateTests[] =
     // Override state
     {
         "Override + dongle out -> Idle",
-        { "dongleIn" }, // get to test state
+        { "dongleIn" },
         { "dongleOut" },
         { "timeSave", "rapidBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim" }
     },
     {
         "Override + plus Button -> increase time",
-        { "dongleIn" }, // get to test state
+        { "dongleIn" },
         { "plusButton" },
         { "shortBeep", "timeAdd" }
     },
     {
         "Override + minus Button -> decrease time",
-        { "dongleIn" }, // get to test state
+        { "dongleIn" },
         { "minusButton" },
         { "shortBeep", "timeRemove" }
     },
     {
         "Override + events that should be ignored -> no effect",
-        { "dongleIn" }, // get to test state
-        { "startButton", "coldTimerExpired", "showerHot", "showerCold", "fiveMinutesToGo",
+        { "dongleIn" },
+        { "startButton", "coldTimerExpired", "showerCold", "fiveMinutesToGo",
           "oneMinuteToGo", "fiveSecondsPassed", "tenSecondsToGo", "showerTimerExpired",
           "lockoutTimerExpired", "reset" },
         {  }
@@ -456,7 +452,7 @@ const TestVector useCaseTests[] =
         { },
         {
             // start
-            "startButton", "showerHot",
+            "startButton",
             // time passes during shower
             "fiveMinutesToGo", "oneMinuteToGo",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
@@ -481,7 +477,7 @@ const TestVector useCaseTests[] =
         { },
         {
             // start
-            "startButton", "showerHot",
+            "startButton",
             // time passes during shower
             "fiveMinutesToGo", "oneMinuteToGo",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
@@ -521,7 +517,7 @@ const TestVector useCaseTests[] =
         { },
         {
             // start
-            "startButton", "showerHot",
+            "startButton",
             // time passes during shower
             "oneMinuteToGo",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",

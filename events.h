@@ -57,10 +57,12 @@ public:
     /// We're into the last minute of the shower timer. Warn the user.
     virtual void oneMinuteToGo() = 0;
 
-    /// We're into the last 10 seconds of the shower timer. Warn the user.
-    virtual void tenSecondsToGo() = 0;
-
     /// Five more seconds have passed.
     /// Depending on state we might want to beep or something.
     virtual void fiveSecondsPassed() = 0;
+
+    /// One second has passed and we're in the last 10 seconds of the shower timer.
+    /// We rely on the system to only call this when we're in the final stages.
+    virtual void oneSecondPassed() = 0;
+
 };

@@ -94,22 +94,22 @@ Press button long -> Water On
 * start shower timer
 * blinking LED
 
-Shower running ->
+Water On ->
 * count down time in mins
 * blinking LED
 * short beep at 5 mins
 
-Shower running, button press -> 3 rapid beeps
+Water On, button press -> 3 rapid beeps
 
-Shower running, long press -> carry on but no beeps
+Water On, long press -> long beep to confirm, carry on but no beeps
 
-Shower running, 1 minute to go ->
+Water On, 1 minute to go ->
 * display seconds
 * blinking LED
 * display alternating bright & dim
 * long beep
 * short beep every 5 seconds
-* constant beeping last 10 seconds (short beep every second)
+* constant beeping last 10 seconds (rapid beeps every second)
 
 Timer expires -> Lockout 
 
@@ -118,7 +118,7 @@ Lockout ->
 * water valve closed
 * count down lockout in mins
 * display flashing
-* button press - 3 rapid beeps
+* any button press - 3 rapid beeps
 
 Lockout complete -> Idle 
 

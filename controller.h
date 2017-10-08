@@ -25,10 +25,19 @@ public:
             actions.displayOn();
             actions.shortBeep();
         }
+        if (state == on)
+        {
+            actions.rapidBeeps();
+        }
     }
 
     void startButtonLong() override final
     {
+        if (state == on)
+        {
+            state = onNoBeeps;
+            actions.longBeep();
+        }
         if (state == idle || state == showingTime)
         {
             state = on;
@@ -43,20 +52,20 @@ public:
 
     virtual void plusButton()
     {
-        if (state == override)
-        {
-            actions.shortBeep();
-            actions.timeAdd();
-        }
+//        if (state == override)
+//        {
+//            actions.shortBeep();
+//            actions.timeAdd();
+//        }
     }
 
     virtual void minusButton()
     {
-        if (state == override)
-        {
-            actions.shortBeep();
-            actions.timeRemove();
-        }
+//        if (state == override)
+//        {
+//            actions.shortBeep();
+//            actions.timeRemove();
+//        }
     }
 
     virtual void dongleIn()
@@ -71,7 +80,7 @@ public:
 
     virtual void dongleOut()
     {
-        goToIdleSpecial();
+//        goToIdleSpecial();
     }
 
     virtual void reset()
@@ -92,31 +101,33 @@ public:
 
     virtual void showerTimerExpired()
     {
-        if (state == showerRunning ||
-            state == showerOffStillTiming ||
-            state == showerRunningFinalCountdown ||
-            state == showerOffStillTimingFinalCountdown ||
-            state == showerRunningVeryEnd ||
-            state == showerOffStillTimingVeryEnd)
+        if (state == on ||
+            state == finalCountdown )
+//            state == showerRunningFinalCountdown ||
+//            state == showerOffStillTimingFinalCountdown ||
+//            state == showerRunningVeryEnd ||
+//            state == showerOffStillTimingVeryEnd)
         {
-            state = lockout;
+//            state = lockout;
+            actions.ledOn();
             actions.valveClosed();
             actions.showLockoutTime();
+            actions.displayFlash();
         }
     }
 
 
     virtual void lockoutTimerExpired()
     {
-        if (state == lockout)
-        {
-            goToIdleNoBeep();
-        }
+//        if (state == lockout)
+//        {
+//            goToIdleNoBeep();
+//        }
     }
 
     virtual void fiveMinutesToGo()
     {
-        if (state == showerRunning)
+        if (state == on)
         {
             actions.shortBeep();
         }
@@ -124,44 +135,43 @@ public:
 
     virtual void oneMinuteToGo()
     {
-        if (state == showerRunning)
+        if (state == on)
         {
+            state = finalCountdown;
+            actions.showFinalCountdown();
+            actions.displayPulse();
             actions.longBeep();
-            actions.showFinalCountdown();
-            state = showerRunningFinalCountdown;
         }
-        if (state == showerOffStillTiming)
-        {
-            actions.showFinalCountdown();
-            state = showerOffStillTimingFinalCountdown;
-        }
-    }
-
-    virtual void tenSecondsToGo()
-    {
-        if (state == showerRunning || state == showerRunningFinalCountdown)
-        {
-            actions.rapidBeeps();
-            actions.displayFlash();
-            state = showerRunningVeryEnd;
-        }
-        if (state == showerOffStillTiming || state == showerOffStillTimingFinalCountdown)
-        {
-            actions.displayFlash();
-            state = showerOffStillTimingVeryEnd;
-        }
+//        if (state == showerOffStillTiming)
+//        {
+//            actions.showFinalCountdown();
+//            state = showerOffStillTimingFinalCountdown;
+//        }
     }
 
     virtual void fiveSecondsPassed()
     {
-        if (state == showerRunningFinalCountdown)
+        if (state == finalCountdown)
         {
             actions.shortBeep();
         }
-        if (state == showerRunningVeryEnd)
+//        if (state == showerRunningVeryEnd)
+//        {
+//            actions.rapidBeeps();
+//        }
+    }
+
+    virtual void oneSecondPassed()
+    {
+        if (state == on || state == finalCountdown)
         {
             actions.rapidBeeps();
         }
+//        if (state == showerOffStillTiming || state == showerOffStillTimingFinalCountdown)
+//        {
+//            actions.displayFlash();
+//            state = showerOffStillTimingVeryEnd;
+//        }
     }
 
 private:
@@ -169,14 +179,15 @@ private:
     enum State
     {
         idle,
-        on,
         showingTime,
-        showerRunning,
-        showerRunningFinalCountdown,
-        showerRunningVeryEnd,
-        showerOffStillTiming,
-        showerOffStillTimingFinalCountdown,
-        showerOffStillTimingVeryEnd,
+        on,
+        onNoBeeps,
+        //showerRunning,
+        finalCountdown,
+        //showerRunningVeryEnd,
+        //showerOffStillTiming,
+        //showerOffStillTimingFinalCountdown,
+        //showerOffStillTimingVeryEnd,
         lockout,
         override
     };
