@@ -25,7 +25,7 @@ public:
             actions.displayOn();
             actions.shortBeep();
         }
-        if (state == on || state == lockout || state == override)
+        else// if (state != showingTime)
         {
             actions.rapidBeeps();
         }

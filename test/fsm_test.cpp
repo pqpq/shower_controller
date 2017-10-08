@@ -186,6 +186,12 @@ const TestVector stateTests[] =
         { "displayOff", "ledFlashing", "valveClosed" }
     },
     {
+        "Showing time + short start button -> error beeps",
+        { "startButtonShort" },
+        { "startButtonShort" },
+        { "rapidBeeps" }
+    },
+    {
         "Showing time + long start button -> Water On",
         { "startButtonShort" },
         { "startButtonLong" },
@@ -207,9 +213,8 @@ const TestVector stateTests[] =
         "Showing time + events that should be ignored -> no effect",
         { "startButtonShort" },
         {
-            "startButtonShort", "plusButton", "minusButton", "showerTimerExpired",
-            "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
-            "fiveSecondsPassed", "oneSecondPassed"
+            "plusButton", "minusButton", "showerTimerExpired", "lockoutTimerExpired",
+            "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "oneSecondPassed"
         },
         { }
     },
@@ -483,30 +488,45 @@ TEST_CASE("Table driven FSM test")
 const TestVector useCaseTests[] =
 {
     {
+        "Show time, back to idle",
+        { },
+        {
+            "startButtonShort",
+            "startButtonShort", // check this give error beeps
+            "showTimerExpired"
+        },
+        {
+            "showTimerStart", "showShowerTime", "displayOn", "shortBeep",
+            "rapidBeeps",
+            "displayOff", "ledFlashing", "valveClosed"
+        }
+    },
+    {
         "Normal use, timing out",
         { },
         {
             // start
-            "startButton",
+            "startButtonLong",
             // time passes during shower
-            "fiveMinutesToGo", "oneMinuteToGo",
+            "fiveMinutesToGo",
+            "oneMinuteToGo",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
-            "tenSecondsToGo", "fiveSecondsPassed",
-            "showerTimerExpired", "lockoutTimerExpired"
+            "oneSecondPassed", "oneSecondPassed", "oneSecondPassed",
+            // end
+            "showerTimerExpired",
+            "lockoutTimerExpired"
         },
         {
-            // start
-            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
-            // showering
-            "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep",
+            "longBeep", "valveOpen", "showShowerTime", "displayOn", "showerTimerStart", "ledFlashing",
             "shortBeep",
-            "longBeep", "showFinalCountdown",
+            "showFinalCountdown", "displayPulse", "longBeep",
             "shortBeep", "shortBeep", "shortBeep",
-            "rapidBeep", "displayFlash", "rapidBeep",
-            "redLedFlashing", "valveClosed", "showLockoutTime",
-            "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
+            "rapidBeeps", "rapidBeeps", "rapidBeeps",
+            "ledOn", "valveClosed", "showLockoutTime", "displayFlash",
+            "displayOff", "ledFlashing", "valveClosed"
         }
     },
+/*
     {
         "Normal use, finishing just before timer expires",
         { },
@@ -571,6 +591,7 @@ const TestVector useCaseTests[] =
             "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
         }
     },
+*/
 };
 
 TEST_CASE("Table driven use case tests")
@@ -579,7 +600,7 @@ TEST_CASE("Table driven use case tests")
     {
         SECTION(v.testName)
         {
-            //apply(v);
+            apply(v);
         }
     }
 }
