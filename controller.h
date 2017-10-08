@@ -12,7 +12,7 @@
 class Controller : public Events
 {
 public:
-    Controller(Actions& a) : actions(a) { goToIdleNormal(); }
+    Controller(Actions& a) : actions(a), silent(false) { goToIdleNormal(); }
 
     // Events
     void startButtonShort() override final
@@ -25,7 +25,7 @@ public:
             actions.displayOn();
             actions.shortBeep();
         }
-        if (state == on || state == lockout || state == silent || state == override)
+        if (state == on || state == lockout || state == override)
         {
             actions.rapidBeeps();
         }
@@ -42,22 +42,9 @@ public:
             actions.longBeep();
         }
 
-        if (state == on)
+        if (state == on || state == finalCountdown)
         {
-            state = silent;
-        }
-        else if (state == silent)
-        {
-            state = on;
-        }
-
-        if (state == finalCountdown)
-        {
-            state = finalCountdownSilent;
-        }
-        else if (state == finalCountdownSilent)
-        {
-            state = finalCountdown;
+            silent = !silent;
         }
 
         if (state == idle || state == showingTime)
@@ -122,8 +109,7 @@ public:
 
     virtual void showerTimerExpired()
     {
-        if (state == on || state == finalCountdown ||
-            state == silent || state == finalCountdownSilent)
+        if (state == on || state == finalCountdown)
         {
             state = lockout;
             actions.ledOn();
@@ -143,7 +129,7 @@ public:
 
     virtual void fiveMinutesToGo()
     {
-        if (state == on)
+        if (state == on && !silent)
         {
             actions.shortBeep();
         }
@@ -156,19 +142,16 @@ public:
             state = finalCountdown;
             actions.showFinalCountdown();
             actions.displayPulse();
-            actions.longBeep();
-        }
-        if (state == silent)
-        {
-            state = finalCountdownSilent;
-            actions.showFinalCountdown();
-            actions.displayPulse();
+            if (!silent)
+            {
+                actions.longBeep();
+            }
         }
     }
 
     virtual void fiveSecondsPassed()
     {
-        if (state == finalCountdown)
+        if (state == finalCountdown && !silent)
         {
             actions.shortBeep();
         }
@@ -176,7 +159,7 @@ public:
 
     virtual void oneSecondPassed()
     {
-        if (state == on || state == finalCountdown)
+        if ((state == on || state == finalCountdown) && !silent)
         {
             actions.rapidBeeps();
         }
@@ -189,15 +172,14 @@ private:
         idle,
         showingTime,
         on,
-        silent,
         finalCountdown,
-        finalCountdownSilent,
         lockout,
         override
     };
 
     Actions& actions;
     State state;
+    bool silent;
 
     void goToIdleNoBeep()
     {
