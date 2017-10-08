@@ -23,13 +23,14 @@ Button minusButton(A2);
 
 const int pins[8] = { SEG_A, SEG_B, SEG_C, SEG_D, SEG_E, SEG_F, SEG_G, SEG_DOT };
 
-Display sevenSeg(pins, LATCH1_ENABLE, LATCH0_ENABLE, LEDS_OE);
+Display display(pins, LATCH1_ENABLE, LATCH0_ENABLE, LEDS_OE);
+
   
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
 
-  sevenSeg.setup();
+  display.setup();
 }
 
 
@@ -44,16 +45,16 @@ void loop()
   if (plus) n++;
   else if (minus) n--;
 
-  sevenSeg.showNumber(n, start);
+  display.showNumber(n, start);
 
   // demonstrate PWM dimming
   if (n/10 % 2)
   {
-    sevenSeg.dim();
+    display.dim();
   }
   else
   {
-    sevenSeg.bright();
+    display.bright();
   }
 
   delay(10);

@@ -23,10 +23,10 @@ static const int digitMapping[10] =
 class Display
 {
 public:
-  
+
   typedef int Pins [8];
 
-private:  
+private:
 
   const Pins & pins;
   int selectDigit0;
@@ -53,25 +53,25 @@ public:
     pinMode(pins[5], OUTPUT);
     pinMode(pins[6], OUTPUT);
     pinMode(pins[7], OUTPUT);
-  
+
     // latch enables
     pinMode(selectDigit0, OUTPUT);
     pinMode(selectDigit1, OUTPUT);
-  
+
     // output enable (LED dimmer)
     pinMode(pwm, OUTPUT);
 
     writeBits(0, false);
-  
+
     digitalWrite(selectDigit0, LOW);
     digitalWrite(selectDigit1, LOW);
     digitalWrite(pwm, LOW);
   }
-  
+
   void showNumber(int n, bool showDot)
   {
     const int digitOff = 99;
-    
+
     const int tens = n < 100 ? n / 10 : digitOff;
     const int units = n < 100 ? n % 10 : digitOff;
     writeDigit(1, tens, showDot);
@@ -83,14 +83,14 @@ public:
     // ~OE so high PWM duty cycle = low duty cycle for LEDs
     analogWrite(pwm, 220);
   }
-  
+
   void bright()
   {
     digitalWrite(pwm, LOW);
   }
-  
+
 private:
-  
+
   void writeBits(int bits, bool showDot)
   {
     digitalWrite(pins[0], bits & 0b0000001 ? LOW : HIGH);
