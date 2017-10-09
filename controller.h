@@ -30,8 +30,6 @@ public:
             state = on;
             actions.longBeep();
             actions.valveOpen();
-            actions.showShowerTime();
-            actions.displayOn();
             actions.showerTimerStart();
             actions.ledFlashing();
         }

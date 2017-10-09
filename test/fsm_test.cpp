@@ -182,7 +182,7 @@ const TestVector stateTests[] =
         "Showing time + start button -> Water On",
         { "startButton" },
         { "startButton" },
-        { "longBeep", "valveOpen", "showShowerTime", "displayOn", "showerTimerStart", "ledFlashing" }
+        { "longBeep", "valveOpen", "showerTimerStart", "ledFlashing" }
     },
     {
         "Showing time + dongle -> Override",
@@ -467,20 +467,18 @@ const TestVector useCaseTests[] =
         { },
         {
             // start
-            "startButton",
-            "startButton",
+            "startButton", "startButton",
             // time passes during shower
             "fiveMinutesToGo",
             "oneMinuteToGo",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
             "oneSecondPassed", "oneSecondPassed", "oneSecondPassed",
             // end
-            "showerTimerExpired",
-            "lockoutTimerExpired"
+            "showerTimerExpired", "lockoutTimerExpired"
         },
         {
             "showTimerStart", "showShowerTime", "displayOn", "shortBeep",
-            "longBeep", "valveOpen", "showShowerTime", "displayOn", "showerTimerStart", "ledFlashing",
+            "longBeep", "valveOpen", "showerTimerStart", "ledFlashing",
             "shortBeep",
             "showFinalCountdown", "displayPulse", "longBeep",
             "shortBeep", "shortBeep", "shortBeep",
@@ -489,45 +487,32 @@ const TestVector useCaseTests[] =
             "displayOff", "ledFlashing", "valveClosed"
         }
     },
-/*
     {
-        "Normal use, finishing just before timer expires",
+        "Normal use, timing out, silent half way through",
         { },
         {
             // start
-            "startButton",
+            "startButton", "startButton",
             // time passes during shower
-            "fiveMinutesToGo", "oneMinuteToGo",
+            "fiveMinutesToGo",
+            "oneMinuteToGo",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
-            // stop
-            "showerCold",
-            // more time passes
+            "startButton",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
-            "tenSecondsToGo", "fiveSecondsPassed",
-            "showerTimerExpired", "lockoutTimerExpired"
+            "oneSecondPassed", "oneSecondPassed", "oneSecondPassed",
+            // end
+            "showerTimerExpired",
+            "lockoutTimerExpired"
         },
         {
-            // start
-            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
-            // showering
-            "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep",
+            "showTimerStart", "showShowerTime", "displayOn", "shortBeep",
+            "longBeep", "valveOpen", "showerTimerStart", "ledFlashing",
             "shortBeep",
-            "longBeep", "showFinalCountdown",
+            "showFinalCountdown", "displayPulse", "longBeep",
             "shortBeep", "shortBeep", "shortBeep",
-            "displayFlash",
-            "redLedFlashing", "valveClosed", "showLockoutTime",
-            "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
-        }
-    },
-    {
-        "Turn on cold for a few minutes",
-        { },
-        { "startButton", "coldTimerExpired" },
-        {
-            // start
-            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
-            // cold timer expired
-            "shortBeep", "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
+            "longBeep",
+            "ledOn", "valveClosed", "showLockoutTime", "displayFlash",
+            "displayOff", "ledFlashing", "valveClosed"
         }
     },
     {
@@ -535,26 +520,26 @@ const TestVector useCaseTests[] =
         { },
         {
             // start
-            "startButton",
+            "startButton", "startButton",
             // time passes during shower
             "oneMinuteToGo",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
-            "tenSecondsToGo", "fiveSecondsPassed",
+            "oneSecondPassed", "oneSecondPassed", "oneSecondPassed",
+            // end
             "showerTimerExpired", "lockoutTimerExpired"
         },
         {
             // start
-            "greenLedOn", "longBeep", "showShowerTime", "displayBright", "coldTimerStart", "valveOpen",
+            "showTimerStart", "showShowerTime", "displayOn", "shortBeep",
+            "longBeep", "valveOpen", "showerTimerStart", "ledFlashing",
             // showering
-            "coldTimerStop", "showerTimerStart", "greenLedFlashing", "shortBeep",
-            "longBeep", "showFinalCountdown",
+            "showFinalCountdown", "displayPulse", "longBeep",
             "shortBeep", "shortBeep", "shortBeep",
-            "rapidBeep", "displayFlash", "rapidBeep",
-            "redLedFlashing", "valveClosed", "showLockoutTime",
-            "greenLedOn", "valveClosed", "showShowerTime", "displayDim"
+            "rapidBeeps", "rapidBeeps", "rapidBeeps",
+            "ledOn", "valveClosed", "showLockoutTime", "displayFlash",
+            "displayOff", "ledFlashing", "valveClosed"
         }
     },
-*/
 };
 
 TEST_CASE("Table driven use case tests")
