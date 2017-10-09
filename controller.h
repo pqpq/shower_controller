@@ -15,7 +15,7 @@ public:
     Controller(Actions& a) : actions(a), silent(false) { goToIdleNormal(); }
 
     // Events
-    void startButtonShort() override final
+    void startButton() override final
     {
         if (state == idle)
         {
@@ -25,36 +25,26 @@ public:
             actions.displayOn();
             actions.shortBeep();
         }
-        else// if (state != showingTime)
-        {
-            actions.rapidBeeps();
-        }
-    }
-
-    void startButtonLong() override final
-    {
-        if (state == lockout || state == override)
-        {
-            actions.rapidBeeps();
-        }
-        else
-        {
-            actions.longBeep();
-        }
-
-        if (state == on || state == finalCountdown)
-        {
-            silent = !silent;
-        }
-
-        if (state == idle || state == showingTime)
+        else if (state == showingTime)
         {
             state = on;
+            actions.longBeep();
             actions.valveOpen();
             actions.showShowerTime();
             actions.displayOn();
             actions.showerTimerStart();
             actions.ledFlashing();
+        }
+
+        else if (state == on || state == finalCountdown)
+        {
+            actions.longBeep();
+            silent = !silent;
+        }
+
+        else
+        {
+            actions.rapidBeeps();
         }
     }
 

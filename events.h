@@ -11,12 +11,8 @@ public:
 
     // Push buttons
 
-    /// A short press of the "start" pushbutton.
-    virtual void startButtonShort() = 0;
-
-    /// A long press of the "start" pushbutton that tells us the user wants to
-    /// start the shower, or cancel the warnings when they have finished.
-    virtual void startButtonLong() = 0;
+    /// A press of the "start" pushbutton.
+    virtual void startButton() = 0;
 
     /// The '+' pushbutton that adds time when the dongle is plugged in.
     virtual void plusButton() = 0;
