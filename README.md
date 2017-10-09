@@ -63,12 +63,12 @@ Pin usage:
 ## “UI”
 
 ### Concepts
-* Short beep to confirm every button press, or ...
-* 3 quick beeps for negative
+* Every button press should have a beep to confirm.
+* If button press isn't allowed, 3 quick beeps for negative confirmation.
 * Long beep to attract attention?
 * Always have some LED on so we know the unit is functioning.
-* If display is off, LED should blink.
-* If display isn't changing rapidly, LED should blink
+* Something should change each second to show signs of life. If the display is off, the LED should blink. If display isn't changing rapidly (e.g. when its showing minutes), the LED should blink.
+
 
 ### Flow
 Power on -> Idle
@@ -78,7 +78,7 @@ Idle:
 * Water valve closed
 * short beep
 
-Press button short -> Show time
+Press button -> Show time
 * start show time timer
 * show shower time
 * display bright
@@ -86,7 +86,7 @@ Press button short -> Show time
 
 Show time timer expires -> Idle
 
-Press button long -> Water On
+Press button during Show time -> Water On
 * water valve open
 * long beep
 * show shower time
@@ -99,12 +99,10 @@ Water On ->
 * blinking LED
 * short beep at 5 mins
 
-Water On, button press -> 3 rapid beeps
-
-Water On, long press -> Silent
+Water On, button press -> Silent
 * long beep to confirm
 * as Water On, but no beeps
-* long press toggles back & forth Silent/On
+* press toggles back & forth Silent/On
 
 Water On, 1 minute to go ->
 * display seconds
