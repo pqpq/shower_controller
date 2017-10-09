@@ -6,8 +6,11 @@ default: all
 obj/fsm_test.o: test/fsm_test.cpp $(HEADERS) obj/
 	g++ $(FLAGS) -c test/fsm_test.cpp -o obj/fsm_test.o
 
-all: obj/fsm_test.o
-	g++ obj/fsm_test.o -o fsm_test
+obj/beep_test.o: test/beep_test.cpp $(HEADERS) obj/
+	g++ $(FLAGS) -c test/beep_test.cpp -o obj/beep_test.o
+
+all: obj/fsm_test.o obj/beep_test.o
+	g++ obj/fsm_test.o obj/beep_test.o -o fsm_test
 
 obj/:
 	mkdir -p obj
