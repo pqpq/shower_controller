@@ -540,6 +540,69 @@ const TestVector useCaseTests[] =
             "displayOff", "ledFlashing", "valveClosed"
         }
     },
+    {
+        "Normal use, timed out, then try to have another shower -> error beeps because we're locked out",
+        { },
+        {
+            // start
+            "startButton", "startButton",
+            // end
+            "showerTimerExpired",
+            // start again
+            "startButton", "startButton",
+        },
+        {
+            // start
+            "showTimerStart", "showShowerTime", "displayOn", "shortBeep",
+            "longBeep", "valveOpen", "showerTimerStart", "ledFlashing",
+            // end
+            "ledOn", "valveClosed", "showLockoutTime", "displayFlash",
+            // start again
+            "rapidBeeps", "rapidBeeps",
+        }
+    },
+    {
+        "Normal use, timed out, then reset so we can start again",
+        { },
+        {
+            // start
+            "startButton", "startButton",
+            // end
+            "showerTimerExpired",
+            "reset",
+            // start again
+            "startButton", "startButton",
+        },
+        {
+            // start
+            "showTimerStart", "showShowerTime", "displayOn", "shortBeep",
+            "longBeep", "valveOpen", "showerTimerStart", "ledFlashing",
+            // end
+            "ledOn", "valveClosed", "showLockoutTime", "displayFlash",
+            // reset
+            "rapidBeeps", "displayOff", "ledFlashing", "valveClosed",
+            // start again
+            "showTimerStart", "showShowerTime", "displayOn", "shortBeep",
+            "longBeep", "valveOpen", "showerTimerStart", "ledFlashing"
+        }
+    },
+    {
+        "Dongle in, change time",
+        { },
+        {
+            "dongleIn",
+            "plusButton", "plusButton", "plusButton", "minusButton",
+            "plusButton", "minusButton", "minusButton",
+            "dongleOut"
+        },
+        {
+            "rapidBeeps", "ledFlashing", "showShowerTime", "displayPulse", "valveOpen",
+            "shortBeep", "timeAdd", "shortBeep", "timeAdd", "shortBeep", "timeAdd",
+            "shortBeep", "timeRemove", "shortBeep", "timeAdd", "shortBeep", "timeRemove",
+            "shortBeep", "timeRemove",
+            "timeSave", "rapidBeeps", "displayOff", "ledFlashing", "valveClosed"
+        }
+    }
 };
 
 TEST_CASE("Table driven use case tests")
@@ -552,24 +615,3 @@ TEST_CASE("Table driven use case tests")
         }
     }
 }
-
-
-// all events
-/*
-
-"startButtonShort",
-"startButtonLong",
-"plusButton",
-"minusButton",
-"dongleIn",
-"dongleOut",
-"reset",
-"showTimerExpired",
-"showerTimerExpired",
-"lockoutTimerExpired",
-"fiveMinutesToGo",
-"oneMinuteToGo",
-"fiveSecondsPassed"
-"oneSecondPassed",
-
- */

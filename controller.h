@@ -5,10 +5,11 @@
 
 /// Finite State Machine that responds to Events, causing Actions, depending
 /// on the internal state.
+///
 /// This pattern is described in https://accu.org/index.php/journals/1548
-/// It allows us to write and test the FSM with no dependencies on the embedded
-/// system that it will eventually control.
-
+/// It allows us to write and test (or TDD) the FSM with no dependencies on the
+/// embedded system that it will eventually control.
+///
 class Controller : public Events
 {
 public:
@@ -33,13 +34,11 @@ public:
             actions.showerTimerStart();
             actions.ledFlashing();
         }
-
         else if (state == on || state == finalCountdown)
         {
             actions.longBeep();
             silent = !silent;
         }
-
         else
         {
             actions.rapidBeeps();
