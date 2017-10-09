@@ -1,4 +1,4 @@
-HEADERS = controller.h actions.h events.h
+HEADERS = controller.h actions.h events.h beep.h
 FLAGS = -std=c++11 -Wall -Werror
 
 default: all
