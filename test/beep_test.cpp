@@ -64,10 +64,6 @@ TEST_CASE("shortBeep turns on for 3 polls")
     uut.poll();
     REQUIRE(testCalls == 1);
     REQUIRE(testValue == false);
-
-    testClear();
-    uut.poll();
-    REQUIRE(testCalls == 0);
 }
 
 TEST_CASE("longBeep turns on for 6 polls")
@@ -102,10 +98,6 @@ TEST_CASE("longBeep turns on for 6 polls")
     uut.poll();
     REQUIRE(testCalls == 1);
     REQUIRE(testValue == false);
-
-    testClear();
-    uut.poll();
-    REQUIRE(testCalls == 0);
 }
 
 TEST_CASE("rapidBeeps beeps 3 times")
@@ -152,8 +144,64 @@ TEST_CASE("rapidBeeps beeps 3 times")
     uut.poll();
     REQUIRE(testCalls == 1);
     REQUIRE(testValue == false);
+}
+
+TEST_CASE("two short beeps are separated")
+{
+    Beep uut(testCallback);
+
+    // doesn't call back immediately
+    testClear();
+
+    uut.shortBeep();
+    uut.shortBeep();
+
+    REQUIRE(testCalls == 0);
+
+    // On on 1st poll
+    testClearTo(false);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == true);
 
     testClear();
     uut.poll();
     REQUIRE(testCalls == 0);
+    uut.poll();
+    REQUIRE(testCalls == 0);
+
+    // Off on 4th poll
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == false);
+
+    // silent for another
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 0);
+
+    // on for second beep
+    testClearTo(false);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == true);
+
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 0);
+    uut.poll();
+    REQUIRE(testCalls == 0);
+
+    // off again
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == false);
+
+    // silent
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 0);
 }
+

@@ -2,59 +2,66 @@
 
 #include <stddef.h>
 
+//#include <iostream>
+//using namespace std;
+
 class Beep
 {
 public:
     typedef void Callback(bool);
 
     Beep(Callback & c)
-        : callback(c), on(false), duration(0), q(0)
+        : callback(c), on(false), duration(0), r(0), w(0)
     {
+        //queue[0] = 0;
         callback(false);
     }
 
     void poll()
     {
-        if (duration == 0 && on)
-        {
-            callback(false);
-            on = false;
-            if (q)
-            {
-                for (size_t i = 0; i < queueSize-1; ++i)
-                {
-                    queue[i] = queue[i+1];
-                }
-                q--;
+//        cout << '[';
+//        for (size_t i = 0; i < queueSize-1; ++i)
+//        {
+//            cout << queue[i] << ", ";
+//        }
+//        cout << queue[queueSize-1] << ']' << endl;
+//        cout << "r=" << r << ", w=" << w << endl;
 
-                if (q)
-                {
-                    duration = queue[0];
-                }
-            }
+        int & n = queue[r];
+        if (n > 0)
+        {
+            n--;
+        }
+        else if (n < 0)
+        {
+            n++;
         }
 
-        if (duration > 0)
+        if (n == 0 && r != w)
         {
-            if (!on)
+            // advance
+            r++;
+            if (queue[r] > 0)
             {
                 callback(true);
-                on = true;
             }
-            duration--;
+            else //if (queue[w] < 0)
+            {
+                callback(false);
+            }
         }
     }
 
     void shortBeep()
     {
         addOn(3);
-        addOff(1);
+        addOff(2);
     }
 
     void longBeep()
     {
         addOn(6);
-        addOff(1);
+        addOff(2);
     }
 
     void rapidBeeps()
@@ -64,16 +71,14 @@ public:
         addOn(1);
         addOff(1);
         addOn(1);
-        addOff(1);
+        addOff(2);
     }
 
 private:
 
     enum
     {
-        queueSize = 20,
-        onBit    = 0x80,
-        timeMask = 0x7f
+        queueSize = 20
     };
 
     Callback & callback;
@@ -81,31 +86,29 @@ private:
     bool on;
     size_t duration;
 
-    unsigned char queue[queueSize];
-    size_t q;
+    int queue[queueSize];
+    size_t r;
+    size_t w;
 
-    void addOn(size_t n)
+    void addOn(unsigned int n)
     {
-        enqueue(n, true);
+        enqueue(n);
     }
 
-    void addOff(size_t n)
+    void addOff(unsigned int n)
     {
-        enqueue(n, false);
+        enqueue(-n);
     }
 
-    void enqueue(size_t n, bool on)
+    void enqueue(int n)
     {
-        if (q < queueSize)
+        if (w == 0) // empty
         {
-            unsigned char x = n & timeMask;
-            if (on)
-            {
-                x |= onBit;
-            }
-            queue[q] = x;
-            q++;
+            queue[w++] = 0;
         }
-
+        if (w < queueSize)
+        {
+            queue[w++] = n;
+        }
     }
 };
