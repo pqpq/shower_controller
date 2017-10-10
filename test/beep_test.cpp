@@ -205,3 +205,152 @@ TEST_CASE("two short beeps are separated")
     REQUIRE(testCalls == 0);
 }
 
+TEST_CASE("Can add beeps indefinitely")
+{
+    constexpr size_t MAX(10);
+    Beep uut(testCallback, MAX);
+
+    uut.rapidBeeps();
+
+    uut.poll();
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testValue == false);
+
+    // Add another before last one has fully expired
+    uut.rapidBeeps();
+
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 0);
+
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 2);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 3);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 4);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 5);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 6);
+    REQUIRE(testValue == false);
+
+    // time passes
+    for (size_t i = 0; i < 10; ++i)
+    {
+        uut.poll();
+    }
+
+    // and another
+    uut.rapidBeeps();
+
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 2);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 3);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 4);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 5);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 6);
+    REQUIRE(testValue == false);
+    uut.poll();
+
+    // and another
+    uut.rapidBeeps();
+
+    testClear();
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 2);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 3);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 4);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 5);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 6);
+    REQUIRE(testValue == false);
+}
+
+TEST_CASE("With queue full, another beep is ignored")
+{
+    constexpr size_t MAX(5);
+    Beep uut(testCallback, MAX);
+
+    uut.shortBeep();
+    uut.shortBeep();
+    uut.longBeep();
+
+    // first short beep
+    testClearTo(false);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    uut.poll();
+    REQUIRE(testCalls == 2);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 2);
+
+    // second short beep
+    testClearTo(false);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    REQUIRE(testValue == true);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    uut.poll();
+    REQUIRE(testCalls == 1);
+    uut.poll();
+    REQUIRE(testCalls == 2);
+    REQUIRE(testValue == false);
+    uut.poll();
+    REQUIRE(testCalls == 2);
+
+    // silent
+    testClear();
+    uut.poll();
+    uut.poll();
+    uut.poll();
+    uut.poll();
+    uut.poll();
+    uut.poll();
+    REQUIRE(testCalls == 0);
+}

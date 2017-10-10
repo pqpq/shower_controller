@@ -2,30 +2,30 @@
 
 #include <stddef.h>
 
-//#include <iostream>
-//using namespace std;
+#include <iostream>
+using namespace std;
 
 class Beep
 {
 public:
     typedef void Callback(bool);
 
-    Beep(Callback & c)
+    Beep(Callback & c, size_t size = queueSize)
         : callback(c), on(false), duration(0), r(0), w(0)
+        , max(size > queueSize ? queueSize : size)
     {
-        //queue[0] = 0;
+        queue[0] = 0;
         callback(false);
+
+        for (size_t i = 1; i < queueSize; ++i)
+        {
+            queue[i] = 99;
+        }
     }
 
     void poll()
     {
-//        cout << '[';
-//        for (size_t i = 0; i < queueSize-1; ++i)
-//        {
-//            cout << queue[i] << ", ";
-//        }
-//        cout << queue[queueSize-1] << ']' << endl;
-//        cout << "r=" << r << ", w=" << w << endl;
+        dump("poll");
 
         int & n = queue[r];
         if (n > 0)
@@ -37,10 +37,15 @@ public:
             n++;
         }
 
-        if (n == 0 && r != w)
+        if (n == 0 && !isEmpty())
         {
             // advance
             r++;
+            if (r >= max)
+            {
+                r = 0;
+            }
+
             if (queue[r] > 0)
             {
                 callback(true);
@@ -54,24 +59,36 @@ public:
 
     void shortBeep()
     {
-        addOn(3);
-        addOff(2);
+        if (space() >= 2)
+        {
+            addOn(3);
+            addOff(2);
+        }
+        dump("shortBeep");
     }
 
     void longBeep()
     {
-        addOn(6);
-        addOff(2);
+        if (space() >= 2)
+        {
+            addOn(6);
+            addOff(2);
+        }
+        dump("longBeep");
     }
 
     void rapidBeeps()
     {
-        addOn(1);
-        addOff(1);
-        addOn(1);
-        addOff(1);
-        addOn(1);
-        addOff(2);
+        if (space() >= 6)
+        {
+            addOn(1);
+            addOff(1);
+            addOn(1);
+            addOff(1);
+            addOn(1);
+            addOff(2);
+        }
+        dump("rapidBeeps");
     }
 
 private:
@@ -89,6 +106,28 @@ private:
     int queue[queueSize];
     size_t r;
     size_t w;
+    const size_t max;
+
+    size_t space() const
+    {
+        if (w > r)
+        {
+            return max - (w - r);
+        }
+        if (w < r)
+        {
+            return r - w;
+        }
+
+        if (queue[r] == 0)
+        {
+            return max;
+        }
+
+        return 0;
+    }
+
+    bool isEmpty() const { return space() == max; }
 
     void addOn(unsigned int n)
     {
@@ -102,13 +141,26 @@ private:
 
     void enqueue(int n)
     {
-        if (w == 0) // empty
+        if (w == r) // empty
         {
             queue[w++] = 0;
         }
-        if (w < queueSize)
+
+        queue[w++] = n;
+        if (w >= max)
         {
-            queue[w++] = n;
+            w = 0;
         }
+    }
+
+    void dump(const char* context) const
+    {
+        cout << context << " : [";
+        for (size_t i = 0; i < queueSize-1; ++i)
+        {
+            cout << queue[i] << ", ";
+        }
+        cout << queue[queueSize-1] << ']' << endl;
+        cout << "r=" << r << ", w=" << w << ", space=" << space() << '/' << max << endl;
     }
 };
