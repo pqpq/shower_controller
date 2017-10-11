@@ -11,7 +11,8 @@ public:
     typedef void Callback(bool);
 
     Beep(Callback & c, size_t size = queueSize)
-        : callback(c), on(false), duration(0), r(0), w(0)
+        : callback(c)
+        , write(0)
         , max(size > queueSize ? queueSize : size)
     {
         queue[0] = 0;
@@ -27,30 +28,25 @@ public:
     {
         dump("poll");
 
-        int & n = queue[r];
-        if (n > 0)
+        int & head = queue[0];
+        if (head > 0)
         {
-            n--;
+            head--;
         }
-        else if (n < 0)
+        else if (head < 0)
         {
-            n++;
+            head++;
         }
 
-        if (n == 0 && !isEmpty())
+        if (head == 0 && !isEmpty())
         {
-            // advance
-            r++;
-            if (r >= max)
-            {
-                r = 0;
-            }
+            advance();
 
-            if (queue[r] > 0)
+            if (head > 0)
             {
                 callback(true);
             }
-            else //if (queue[w] < 0)
+            else if (head < 0)
             {
                 callback(false);
             }
@@ -59,7 +55,7 @@ public:
 
     void shortBeep()
     {
-        if (space() >= 2)
+        if (spaceFor(2))
         {
             addOn(3);
             addOff(2);
@@ -69,7 +65,7 @@ public:
 
     void longBeep()
     {
-        if (space() >= 2)
+        if (spaceFor(2))
         {
             addOn(6);
             addOff(2);
@@ -79,7 +75,7 @@ public:
 
     void rapidBeeps()
     {
-        if (space() >= 6)
+        if (spaceFor(6))
         {
             addOn(1);
             addOff(1);
@@ -100,34 +96,23 @@ private:
 
     Callback & callback;
 
-    bool on;
-    size_t duration;
-
     int queue[queueSize];
-    size_t r;
-    size_t w;
+    size_t write;
     const size_t max;
 
-    size_t space() const
+    void advance()
     {
-        if (w > r)
+        for (size_t i = 1; i < max; ++i)
         {
-            return max - (w - r);
+            queue[i-1] = queue[i];
         }
-        if (w < r)
-        {
-            return r - w;
-        }
-
-        if (queue[r] == 0)
-        {
-            return max;
-        }
-
-        return 0;
+        queue[max-1] = 0;
+        write--;
     }
 
-    bool isEmpty() const { return space() == max; }
+    size_t space() const { return max - write; }
+    bool spaceFor(size_t n) const { return space() >= n; }
+    bool isEmpty() const { return write == 0; }
 
     void addOn(unsigned int n)
     {
@@ -141,16 +126,12 @@ private:
 
     void enqueue(int n)
     {
-        if (w == r) // empty
+        if (isEmpty())
         {
-            queue[w++] = 0;
+            queue[write++] = 0;
         }
 
-        queue[w++] = n;
-        if (w >= max)
-        {
-            w = 0;
-        }
+        queue[write++] = n;
     }
 
     void dump(const char* context) const
@@ -161,6 +142,6 @@ private:
             cout << queue[i] << ", ";
         }
         cout << queue[queueSize-1] << ']' << endl;
-        cout << "r=" << r << ", w=" << w << ", space=" << space() << '/' << max << endl;
+        cout << "write=" << write << ", space=" << space() << '/' << max << endl;
     }
 };
