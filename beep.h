@@ -2,32 +2,40 @@
 
 #include <stddef.h>
 
-#include <iostream>
-using namespace std;
 
+/// Manage a queue of beep requests.
+///
+/// poll() should be called at regular intervals to bump the queue along.
+/// 10Hz would seem about right. Beep durations will have to be tweaked if
+/// the poll frequency is radically different.
+/// The callback function should turn a beeper on and off.
+///
+/// This code is NOT thread safe: it is assumed that beeps are added between
+/// calls to poll().
+///
+/// The class manages a simple queue of times. Positive times are for beep on,
+/// and negative times for beep off. Complex beep patterns can be built up from
+/// sequences of ons and offs.
+/// When the queue is empty, it is primed with a zero to cause poll() to step to
+/// the next slot. This is simpler than some special code to handle the 'start'
+/// condition.
+///
 class Beep
 {
 public:
     typedef void Callback(bool);
 
-    Beep(Callback & c, size_t size = queueSize)
+    Beep(Callback & c, size_t size = maxQueueSize)
         : callback(c)
         , write(0)
-        , max(size > queueSize ? queueSize : size)
+        , size(size > maxQueueSize ? maxQueueSize : size)
     {
         queue[0] = 0;
         callback(false);
-
-        for (size_t i = 1; i < queueSize; ++i)
-        {
-            queue[i] = 99;
-        }
     }
 
     void poll()
     {
-        dump("poll");
-
         int & head = queue[0];
         if (head > 0)
         {
@@ -60,7 +68,6 @@ public:
             addOn(3);
             addOff(2);
         }
-        dump("shortBeep");
     }
 
     void longBeep()
@@ -70,7 +77,6 @@ public:
             addOn(6);
             addOff(2);
         }
-        dump("longBeep");
     }
 
     void rapidBeeps()
@@ -84,35 +90,34 @@ public:
             addOn(1);
             addOff(2);
         }
-        dump("rapidBeeps");
     }
 
 private:
 
     enum
     {
-        queueSize = 20
+        maxQueueSize = 20
     };
 
     Callback & callback;
 
-    int queue[queueSize];
+    int queue[maxQueueSize];
     size_t write;
-    const size_t max;
+    const size_t size;
 
     void advance()
     {
-        for (size_t i = 1; i < max; ++i)
+        for (size_t i = 1; i < size; ++i)
         {
             queue[i-1] = queue[i];
         }
-        queue[max-1] = 0;
+        queue[size-1] = 0;
         write--;
     }
 
-    size_t space() const { return max - write; }
-    bool spaceFor(size_t n) const { return space() >= n; }
-    bool isEmpty() const { return write == 0; }
+    size_t space()            const { return size - write; }
+    bool   spaceFor(size_t n) const { return space() >= n; }
+    bool   isEmpty()          const { return write == 0; }
 
     void addOn(unsigned int n)
     {
@@ -132,16 +137,5 @@ private:
         }
 
         queue[write++] = n;
-    }
-
-    void dump(const char* context) const
-    {
-        cout << context << " : [";
-        for (size_t i = 0; i < queueSize-1; ++i)
-        {
-            cout << queue[i] << ", ";
-        }
-        cout << queue[queueSize-1] << ']' << endl;
-        cout << "write=" << write << ", space=" << space() << '/' << max << endl;
     }
 };
