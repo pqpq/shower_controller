@@ -1,6 +1,17 @@
 
 #include <stddef.h>
 
+/// A simple Timer that calls back when time events have passed.
+///
+/// We track passing milliseconds by reading the HW time in update(), rather
+/// than calling delay() from the main loop and suffering potential drift as a
+/// result.
+///
+/// Blatantly ripped off the "every" concept from an Arduino timer library I
+/// found on't web and now I've lost it so I can't include a reference.
+///
+/// @todo "finished" callback? Make this event 0?
+///
 class Timer
 {
 public:
