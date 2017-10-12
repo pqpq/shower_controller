@@ -1,5 +1,7 @@
-#include "Button.h"
-#include "Display.h"
+#include "button.h"
+#include "display.h"
+#include "timer.h"
+#include "beep.h"
 
 #include <EEPROM.h>
 
@@ -30,6 +32,32 @@ const int pins[8] = { SEG_A, SEG_B, SEG_C, SEG_D, SEG_E, SEG_F, SEG_G, SEG_DOT }
 Display display(pins, LATCH1_ENABLE, LATCH0_ENABLE, LEDS_OE);
 
 
+void beepCallback(bool on)
+{
+  analogWrite(BUZZER_PWM, on ? 50 : 0);
+}
+
+Beep beep(beepCallback);
+
+void beepPoll()
+{
+  beep.poll();
+}
+
+Timer::Milliseconds getTimeNow() { return millis(); }
+Timer timer(getTimeNow);
+void tenSecondCallback()
+{
+  static int n = 0;
+
+  switch(n++)
+  {
+    case 0: beep.shortBeep(); break;
+    case 1: beep.longBeep(); break;
+    case 2: beep.rapidBeeps(); n = 0; break;
+  }
+}
+
 void store(byte x)
 {
   EEPROM.write(EEPROM_ADDR, x);
@@ -50,6 +78,9 @@ void setup()
   {
     n = max;
   }
+
+  timer.every(10000, tenSecondCallback);
+  timer.every(100, beepPoll);
 }
 
 
@@ -95,4 +126,6 @@ void loop()
   }
 
   delay(10);
+
+  timer.update();
 }
