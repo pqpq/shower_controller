@@ -1,8 +1,4 @@
 
-#include <iostream>
-using namespace std;
-
-
 #include <stddef.h>
 
 /// A simple Timer that calls back when time events have passed.
@@ -14,8 +10,6 @@ using namespace std;
 /// Blatantly ripped off the "every" concept from an Arduino timer library I
 /// found on't web and now I've lost it so I can't include a reference.
 ///
-/// @todo "finished" callback? Make this event 0?
-///
 class Timer
 {
 public:
@@ -23,11 +17,9 @@ public:
     typedef Milliseconds TimeFn(void);
     typedef void EventCallbackFn();
 
-    Timer(TimeFn& fn)
-        : get(fn), startTime(0), lastUpdate(0), duration(0), eventIndex(1)
-    {}
+    Timer(TimeFn& fn) : eventIndex(1), getTime(fn), lastUpdate(0) {}
 
-    void every(Milliseconds t, EventCallbackFn& fn)
+    void every(Milliseconds t, EventCallbackFn & fn)
     {
         if (eventIndex < nEvents)
         {
@@ -37,21 +29,15 @@ public:
 
     void start(Milliseconds t, EventCallbackFn & fn)
     {
-        startTime = get();
-        lastUpdate = startTime;
-        duration = t;
-
         events[0].init(t, fn);
-
-        dump("start():");
+        lastUpdate = getTime();
     }
 
-    Milliseconds remaining() const { return duration; }
+    Milliseconds remaining() const { return events[0].remaining; }
 
     void update()
     {
-        dump("update():");
-        const Milliseconds now = get();
+        const Milliseconds now = getTime();
         const Milliseconds delta = now - lastUpdate;
         lastUpdate = now;
 
@@ -59,18 +45,6 @@ public:
         {
             events[i].update(delta);
         }
-
-        cout << "delta = " << delta << endl;
-
-        if (duration > delta)
-        {
-            duration -= delta;
-        }
-        else
-        {
-            duration = 0;
-        }
-        dump("update() done:");
     }
 
 private:
@@ -105,24 +79,10 @@ private:
         }
     };
 
-    static constexpr size_t nEvents = 3;//10;
-
-    TimeFn& get;
-    Milliseconds startTime;
-    Milliseconds lastUpdate;
-    Milliseconds duration;
+    static constexpr size_t nEvents = 10;
     Event events[nEvents];
     size_t eventIndex;
 
-    void dump(const char* context) const
-    {
-        cout << context << endl;
-        cout << "D=" << duration << " start=" << startTime << " lastUpdate=" << lastUpdate << endl;
-        for (size_t i = 0; i < nEvents; ++i)
-        {
-            cout << '[' << i << "] p=" << events[i].period << " r=" << events[i].remaining << endl;
-        }
-        cout << endl;
-    }
-
+    TimeFn& getTime;
+    Milliseconds lastUpdate;
 };

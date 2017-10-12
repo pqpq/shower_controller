@@ -69,21 +69,6 @@ TEST_CASE("Update subtracts passed time from start time")
     REQUIRE(uut.remaining() == t - delta);
 }
 
-TEST_CASE("If too much time has passed before update(), remaining returns zero")
-{
-    Timer uut(getTestTime);
-
-    const Timer::Milliseconds t = 42;
-    testTime = 10;
-
-    uut.start(t, testCallback);
-
-    testTime += t * 2;
-
-    uut.update();
-    REQUIRE(uut.remaining() == 0);
-}
-
 TEST_CASE("finished callback is called when duration gets to zero")
 {
     Timer uut(getTestTime);
