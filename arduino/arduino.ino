@@ -65,6 +65,9 @@ void loop()
     {
       n++;
       store(n);
+      analogWrite(BUZZER_PWM, 50);
+      delay(50);
+      analogWrite(BUZZER_PWM, 0);
     }
   }
   else if (minus)
@@ -73,6 +76,9 @@ void loop()
     {
       n--;
       store(n);
+      analogWrite(BUZZER_PWM, 50);
+      delay(50);
+      analogWrite(BUZZER_PWM, 0);
     }
   }
 
