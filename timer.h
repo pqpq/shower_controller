@@ -23,9 +23,11 @@ public:
     typedef Milliseconds TimeFn(void);
     typedef void EventCallbackFn();
 
-    Timer(TimeFn& fn) : get(fn), startTime(0), duration(0), eventIndex(0) {}
+    Timer(TimeFn& fn)
+        : get(fn), startTime(0), lastUpdate(0), duration(0), eventIndex(1)
+    {}
 
-    void every(Milliseconds t, void(&fn)())
+    void every(Milliseconds t, EventCallbackFn& fn)
     {
         if (eventIndex < nEvents)
         {
@@ -33,11 +35,13 @@ public:
         }
     }
 
-    void start(Milliseconds t)
+    void start(Milliseconds t, EventCallbackFn & fn)
     {
         startTime = get();
         lastUpdate = startTime;
         duration = t;
+
+        events[0].init(t, fn);
 
         dump("start():");
     }

@@ -10,6 +10,8 @@ Timer::Milliseconds getTestTime()
     return testTime;
 }
 
+void dummyCallback() {}
+
 size_t calls = 0;
 void testCallback()
 {
@@ -48,7 +50,7 @@ TEST_CASE("Timer started with a time has that time remaining")
     Timer uut(getTestTime);
 
     const Timer::Milliseconds t = 123;
-    uut.start(t);
+    uut.start(t, dummyCallback);
     REQUIRE(uut.remaining() == t);
 }
 
@@ -60,7 +62,7 @@ TEST_CASE("Update subtracts passed time from start time")
     const Timer::Milliseconds delta = 13;
     testTime = 10101;
 
-    uut.start(t);
+    uut.start(t, dummyCallback);
 
     testTime += delta;
     uut.update();
@@ -74,12 +76,31 @@ TEST_CASE("If too much time has passed before update(), remaining returns zero")
     const Timer::Milliseconds t = 42;
     testTime = 10;
 
-    uut.start(t);
+    uut.start(t, testCallback);
 
     testTime += t * 2;
 
     uut.update();
     REQUIRE(uut.remaining() == 0);
+}
+
+TEST_CASE("finished callback is called when duration gets to zero")
+{
+    Timer uut(getTestTime);
+
+    const Timer::Milliseconds t = 8;
+    testTime = 100;
+
+    calls = 0;
+    uut.start(t, testCallback);
+
+    testTime += t - 1;
+    uut.update();
+    REQUIRE(calls == 0);
+
+    testTime++;
+    uut.update();
+    REQUIRE(calls == 1);
 }
 
 TEST_CASE("Given callback is called every time given period has elapsed")
@@ -92,7 +113,7 @@ TEST_CASE("Given callback is called every time given period has elapsed")
     testTime = 1;
     calls = 0;
 
-    uut.start(999);
+    uut.start(999, dummyCallback);
 
     REQUIRE(calls == 0);
 
@@ -131,7 +152,7 @@ TEST_CASE("Multiple callbacks are called correctly")
     calls1 = 0;
     calls2 = 0;
 
-    uut.start(999);
+    uut.start(999, dummyCallback);
 
     testTime++;
     testTime++;
