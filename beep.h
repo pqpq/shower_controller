@@ -6,8 +6,8 @@
 /// Manage a queue of beep requests.
 ///
 /// poll() should be called at regular intervals to bump the queue along.
-/// 10Hz would seem about right. Beep durations will have to be tweaked if
-/// the poll frequency is radically different.
+/// 20Hz is about right, because this makes the rapid beeps sound right.
+/// Beep durations will have to be tweaked if the poll frequency is changed.
 /// The callback function should turn a beeper on and off.
 ///
 /// This code is NOT thread safe: it is assumed that beeps are added between
@@ -65,8 +65,8 @@ public:
     {
         if (spaceFor(2))
         {
-            addOn(3);
-            addOff(2);
+            addOn(5);
+            addOff(5);
         }
     }
 
@@ -74,8 +74,8 @@ public:
     {
         if (spaceFor(2))
         {
-            addOn(6);
-            addOff(2);
+            addOn(20);
+            addOff(5);
         }
     }
 
@@ -88,7 +88,7 @@ public:
             addOn(1);
             addOff(1);
             addOn(1);
-            addOff(2);
+            addOff(5);
         }
     }
 

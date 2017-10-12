@@ -79,8 +79,8 @@ void setup()
     n = max;
   }
 
-  timer.every(10000, tenSecondCallback);
-  timer.every(100, beepPoll);
+  //timer.every(3000, tenSecondCallback);
+  //timer.every(50, beepPoll);
 }
 
 
