@@ -16,6 +16,18 @@ void testCallback()
     calls++;
 }
 
+size_t calls1 = 0;
+void testCallback1()
+{
+    calls1++;
+}
+
+size_t calls2 = 0;
+void testCallback2()
+{
+    calls2++;
+}
+
 
 TEST_CASE("Fresh timer has 0 time remaining")
 {
@@ -92,11 +104,10 @@ TEST_CASE("Given callback is called every time given period has elapsed")
     uut.update();
     REQUIRE(calls == 1);
 
-    testTime += period + 6; // lots of time has passed - we're late calling update()
+    testTime += period * 2 + 6; // lots of time has passed - we're late calling update()
     uut.update();
     REQUIRE(calls == 2);
 
-    /// @todo something is going wrong here
     testTime += 6;
     uut.update();
     REQUIRE(calls == 2);
@@ -104,5 +115,70 @@ TEST_CASE("Given callback is called every time given period has elapsed")
     testTime += 1;
     uut.update();
     REQUIRE(calls == 3);
+}
 
+TEST_CASE("Multiple callbacks are called correctly")
+{
+    Timer uut(getTestTime);
+
+    const Timer::Milliseconds period1 = 3;
+    uut.every(period1, testCallback1);
+
+    const Timer::Milliseconds period2 = 4;
+    uut.every(period2, testCallback2);
+
+    testTime = 1;
+    calls1 = 0;
+    calls2 = 0;
+
+    uut.start(999);
+
+    testTime++;
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 0);
+    REQUIRE(calls2 == 0);
+
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 1);
+    REQUIRE(calls2 == 0);
+
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 1);
+    REQUIRE(calls2 == 1);
+
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 1);
+    REQUIRE(calls2 == 1);
+
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 2);
+    REQUIRE(calls2 == 1);
+
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 2);
+    REQUIRE(calls2 == 1);
+
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 2);
+    REQUIRE(calls2 == 2);
+
+    testTime++;
+    uut.update();
+
+    REQUIRE(calls1 == 3);
+    REQUIRE(calls2 == 2);
 }

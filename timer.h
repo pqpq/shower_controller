@@ -1,4 +1,8 @@
 
+#include <iostream>
+using namespace std;
+
+
 #include <stddef.h>
 
 /// A simple Timer that calls back when time events have passed.
@@ -19,29 +23,40 @@ public:
     typedef Milliseconds TimeFn(void);
     typedef void EventCallbackFn();
 
-    Timer(TimeFn& fn) : get(fn), startTime(0), duration(0) {}
+    Timer(TimeFn& fn) : get(fn), startTime(0), duration(0), eventIndex(0) {}
 
     void every(Milliseconds t, void(&fn)())
     {
-        events[0].init(t, fn);
+        if (eventIndex < nEvents)
+        {
+            events[eventIndex++].init(t, fn);
+        }
     }
 
     void start(Milliseconds t)
     {
         startTime = get();
+        lastUpdate = startTime;
         duration = t;
+
+        dump("start():");
     }
 
     Milliseconds remaining() const { return duration; }
 
     void update()
     {
+        dump("update():");
         const Milliseconds now = get();
-        const Milliseconds delta = now - startTime;
+        const Milliseconds delta = now - lastUpdate;
+        lastUpdate = now;
+
         for (size_t i = 0; i < nEvents; ++i)
         {
             events[i].update(delta);
         }
+
+        cout << "delta = " << delta << endl;
 
         if (duration > delta)
         {
@@ -51,6 +66,7 @@ public:
         {
             duration = 0;
         }
+        dump("update() done:");
     }
 
 private:
@@ -78,18 +94,31 @@ private:
                 remaining -= delta;
                 if (oldRemaining <= delta)
                 {
-                    remaining += period;
+                    remaining += (delta > period) ? period * (delta / period) : period;
                     fn();
                 }
             }
         }
     };
 
-    static constexpr size_t nEvents = 10;
+    static constexpr size_t nEvents = 3;//10;
 
     TimeFn& get;
     Milliseconds startTime;
+    Milliseconds lastUpdate;
     Milliseconds duration;
     Event events[nEvents];
+    size_t eventIndex;
+
+    void dump(const char* context) const
+    {
+        cout << context << endl;
+        cout << "D=" << duration << " start=" << startTime << " lastUpdate=" << lastUpdate << endl;
+        for (size_t i = 0; i < nEvents; ++i)
+        {
+            cout << '[' << i << "] p=" << events[i].period << " r=" << events[i].remaining << endl;
+        }
+        cout << endl;
+    }
 
 };
