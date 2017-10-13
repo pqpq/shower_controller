@@ -1,5 +1,5 @@
 #include "../timer.h"
-//#include "../beep.h"
+#include "../timer.h"
 
 #include "catch.hpp"
 
