@@ -1,4 +1,4 @@
-HEADERS = controller.h actions.h events.h beep.h timer.h
+HEADERS = controller.h actions.h events.h beep.h timer.h countdown.h
 FLAGS = -std=c++11 -Wall -Werror
 
 default: all
@@ -12,8 +12,11 @@ obj/beep_test.o: test/beep_test.cpp $(HEADERS) obj/
 obj/timer_test.o: test/timer_test.cpp $(HEADERS) obj/
 	g++ $(FLAGS) -c test/timer_test.cpp -o obj/timer_test.o
 
-all: obj/fsm_test.o obj/beep_test.o obj/timer_test.o
-	g++ obj/fsm_test.o obj/beep_test.o obj/timer_test.o -o fsm_test
+obj/countdown_test.o: test/countdown_test.cpp $(HEADERS) obj/
+	g++ $(FLAGS) -c test/countdown_test.cpp -o obj/countdown_test.o
+
+all: obj/fsm_test.o obj/beep_test.o obj/timer_test.o obj/countdown_test.o
+	g++ obj/fsm_test.o obj/beep_test.o obj/timer_test.o  obj/countdown_test.o -o fsm_test
 
 obj/:
 	mkdir -p obj
