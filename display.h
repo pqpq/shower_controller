@@ -24,22 +24,34 @@ class Display
 {
 public:
 
+  enum Mode
+  {
+    Off,
+    Bright,
+    Dim,
+    Flash,
+    Pulse
+  };
+
+  enum Dot
+  {
+    DotOff,
+    DotOn,
+    DotFlash
+  };
+
   typedef int Pins [8];
-
-private:
-
-  const Pins & pins;
-  int selectDigit0;
-  int selectDigit1;
-  int pwm;
-
-public:
 
   Display(const Pins & pins, int selectDigit1, int selectDigit0, int pwm)
   : pins(pins)
   , selectDigit0(selectDigit0)
   , selectDigit1(selectDigit1)
   , pwm(pwm)
+  , mode(Off)
+  , dot(DotFlash)
+  , toggle(false)
+  , number(0)
+  , dotOn(false)
   {}
 
   void setup()
@@ -65,31 +77,103 @@ public:
 
     digitalWrite(selectDigit0, LOW);
     digitalWrite(selectDigit1, LOW);
-    digitalWrite(pwm, LOW);
+
+    setMode(Off);
   }
 
-  void showNumber(int n, bool showDot)
+  void showNumber(int n)
   {
     const int digitOff = 99;
 
     const int tens = n < 100 ? n / 10 : digitOff;
     const int units = n < 100 ? n % 10 : digitOff;
-    writeDigit(1, tens, showDot);
-    writeDigit(0, units, showDot);
+    writeDigit(1, tens, dotOn);
+    writeDigit(0, units, dotOn);
+    number = n;
   }
 
-  void dim()
+  void setDot(Dot d)
   {
-    // ~OE so high PWM duty cycle = low duty cycle for LEDs
-    analogWrite(pwm, 220);
+    dot = d;
+    switch (dot)
+    {
+    default:
+    case DotOff:
+      dotOn = false;
+      break;
+    case DotOn:
+      dotOn = true;
+      break;
+    case DotFlash:
+      dotOn = toggle;
+      break;
+    }
+
+    showNumber(number);
+  }
+  
+  void setMode(Mode m)
+  {
+    mode = m;
+    switch (mode)
+    {
+    default:
+    case Off:
+      off();
+      break;
+    case Dim:
+      dim();
+      break;
+    case Pulse:
+    case Flash:
+    case Bright:
+      on();
+      toggle = true;
+      break;
+    }
   }
 
-  void bright()
+  void tick()
   {
-    digitalWrite(pwm, LOW);
+    toggle = !toggle;
+
+    if (toggle)
+    {
+      if (mode != Off)
+      {
+        on();
+      }
+    }
+    else
+    {
+      if (mode == Pulse)
+      {
+        dim();
+      }
+      else if (mode == Flash)
+      {
+        off();
+      }
+    }
+
+    if (dot == DotFlash)
+    {
+      dotOn = toggle;
+      showNumber(number);
+    }
   }
 
 private:
+
+  const Pins & pins;
+  int selectDigit0;
+  int selectDigit1;
+  int pwm;
+  Mode mode;
+  Dot dot;
+  bool toggle;
+  int number;
+  bool dotOn;
 
   void writeBits(int bits, bool showDot)
   {
@@ -126,5 +210,21 @@ private:
 
     digitalWrite(selectDigit0, LOW);
     digitalWrite(selectDigit1, LOW);
+  }
+
+  void on()
+  {
+    digitalWrite(pwm, LOW);  
+  }
+
+  void off()
+  {
+    digitalWrite(pwm, HIGH);
+  }
+
+  void dim()
+  {
+    // ~OE so high PWM duty cycle = low duty cycle for LEDs
+    analogWrite(pwm, 220);
   }
 };
