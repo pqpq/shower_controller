@@ -111,7 +111,7 @@ public:
 
     showNumber(number);
   }
-  
+ 
   void setMode(Mode m)
   {
     mode = m;
@@ -214,7 +214,7 @@ private:
 
   void on()
   {
-    digitalWrite(pwm, LOW);  
+    digitalWrite(pwm, LOW);
   }
 
   void off()

@@ -33,13 +33,17 @@ Button minusButton(A2);
 Button dongle(A3);
 
 constexpr unsigned int maxShowerTime_mins = 30;
-constexpr unsigned int minShowerTime_mins = 5;
+constexpr unsigned int minShowerTime_mins = 2;//5;
 constexpr unsigned int showTime_sec = 5;
-constexpr unsigned int lockoutTime_mins = 30;
+constexpr unsigned int lockoutTime_mins = 3;//30;
 unsigned int showerTime_mins = 15;
 
 Display display(sevenSegmentPins, LATCH1_ENABLE, LATCH0_ENABLE, LEDS_OE);
 
+void displayFlashPoll()
+{
+  display.tick();
+}
 
 void beepCallback(bool on)
 {
@@ -58,6 +62,7 @@ Timer::Milliseconds getTimeNow() { return millis(); }
 Timer showTimer(getTimeNow);
 Timer showerTimer(getTimeNow);
 Timer lockoutTimer(getTimeNow);
+Timer systemTimer(getTimeNow);
 
 void store(byte x)
 {
@@ -66,12 +71,13 @@ void store(byte x)
 
 enum ShowOnDisplay
 {
+  StoredShowerTimeMins,
   ShowerTimeMins,
   ShowerTimeSecs,
-  LockoutTimeMins  
+  LockoutTimeMins
 };
 
-ShowOnDisplay showOnDisplay = ShowerTimeMins;
+ShowOnDisplay showOnDisplay = StoredShowerTimeMins;
 
 class RealActions : public Actions
 {
@@ -81,10 +87,11 @@ class RealActions : public Actions
     void ledOn() override       { display.setDot(Display::DotOn); }
     void ledFlashing() override { display.setDot(Display::DotFlash); }
 
-    void showShowerTime() override     { showOnDisplay = ShowerTimeMins; }
-    void showFinalCountdown() override { showOnDisplay = ShowerTimeSecs; }
-    void showLockoutTime() override    { showOnDisplay = LockoutTimeMins; }
-    
+    void showShowerTotalTime() override { showOnDisplay = StoredShowerTimeMins; }
+    void showShowerTime() override      { showOnDisplay = ShowerTimeMins; }
+    void showFinalCountdown() override  { showOnDisplay = ShowerTimeSecs; }
+    void showLockoutTime() override     { showOnDisplay = LockoutTimeMins; }
+
     void displayOff() override   { display.setMode(Display::Off); }
     void displayOn() override    { display.setMode(Display::Bright); }
     void displayFlash() override { display.setMode(Display::Flash); }
@@ -98,14 +105,14 @@ class RealActions : public Actions
     void showerTimerStart() override  { showerTimer.start(showerTime_mins * 60 * 1000, showerTimerExpired); }
     void lockoutTimerStart() override { lockoutTimer.start(lockoutTime_mins * 60 * 1000, lockoutTimerExpired); }
 
-    void timeAdd() override 
+    void timeAdd() override
     {
       if (showerTime_mins < maxShowerTime_mins)
       {
         showerTime_mins++;
       }
     }
-    void timeRemove() override 
+    void timeRemove() override
     {
       if (showerTime_mins > minShowerTime_mins)
       {
@@ -119,8 +126,14 @@ RealActions actions;
 
 Controller controller(actions);
 
-Countdown countdown(getTimeNow, fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
-            
+Countdown::Seconds timeToGo()
+{
+  const Timer::Milliseconds ms = showerTimer.remaining();
+  return ms / 1000;
+}
+
+Countdown countdown(timeToGo, fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
+
 // shower timer callbacks -> countdown
 void showerFiveMinutesPassed()  { countdown.fiveMinutes(); }
 void showerOneMinutePassed()    { countdown.oneMinute(); }
@@ -160,13 +173,11 @@ void setup()
   showerTimer.every(1 * 60 * 1000, showerOneMinutePassed);
   showerTimer.every(     5 * 1000, showerFiveSecondsPassed);
   showerTimer.every(     1 * 1000, showerOneSecondPassed);
-  
-  showerTimer.every(50, beepPoll);
+
+  systemTimer.every(50, beepPoll);
+  systemTimer.every(500, displayFlashPoll);
 }
 
-constexpr int loopDelay_ms = 10;
-constexpr int dotFlashPeriod_ms = 500;
-int dotFlash_ms = 0;
 
 void loop()
 {
@@ -197,32 +208,31 @@ void loop()
     controller.dongleOut();
   }
 
-  /// @todo dongle in/out, reset
-  
+  /// @todo reset
+
   switch (showOnDisplay)
   {
   default:
-  case ShowerTimeMins:
+  case StoredShowerTimeMins:
     display.showNumber(showerTime_mins);
+    break;
+  case ShowerTimeMins:
+    //display.showNumber(showerTimer.remaining() / (60 * 1000));
+    display.showNumber(showerTimer.remaining() / 1000);
     break;
   case ShowerTimeSecs:
     display.showNumber(showerTimer.remaining() / 1000);
     break;
-  case LockoutTimeMins: 
-    display.showNumber(lockoutTimer.remaining() / (60 * 1000));
+  case LockoutTimeMins:
+    //display.showNumber(lockoutTimer.remaining() / (60 * 1000));
+    display.showNumber(lockoutTimer.remaining() / 1000);
     break;
   }
-  
+
   showTimer.update();
   showerTimer.update();
   lockoutTimer.update();
+  systemTimer.update();
 
-  delay(loopDelay_ms);
-
-  dotFlash_ms += loopDelay_ms;
-  if (dotFlash_ms > dotFlashPeriod_ms)
-  {
-    dotFlash_ms = 0;
-    display.tick();
-  }
+  delay(10);
 }
