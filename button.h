@@ -14,15 +14,17 @@ class Button
   const int pin;
   int debounce;
   bool pressed;
+  bool justReleased;
 
 public:
 
-  Button(int pin) : pin(pin), debounce(0), pressed(false) {}
+  Button(int pin) : pin(pin), debounce(0), pressed(false), justReleased(false) {}
 
   bool check()
   {
     const bool wasPressed = pressed;
     pressed = debounce > debounceCount;
+    justReleased = false;
     const bool maybePressed = analogRead(pin) > senseThreshold;
     if (maybePressed)
     {
@@ -34,9 +36,13 @@ public:
     else
     {
       debounce = 0;
+      justReleased = pressed;
+      pressed = false;
     }
 
     return pressed && !wasPressed;
   }
+
+  bool released() const { return justReleased; }
 };
 
