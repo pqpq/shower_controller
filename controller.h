@@ -22,7 +22,7 @@ public:
         {
             state = showingTime;
             actions.showTimerStart();
-            actions.showShowerTime();
+            actions.showShowerTotalTime();
             actions.displayOn();
             actions.shortBeep();
         }
@@ -32,6 +32,7 @@ public:
             actions.longBeep();
             actions.valveOpen();
             actions.showerTimerStart();
+            actions.showShowerTime();
             actions.ledFlashing();
         }
         else if (state == on || state == finalCountdown)
@@ -68,7 +69,7 @@ public:
         state = override;
         actions.rapidBeeps();
         actions.ledFlashing();
-        actions.showShowerTime();
+        actions.showShowerTotalTime();
         actions.displayPulse();
         actions.valveOpen();
     }

@@ -15,6 +15,7 @@ public:
     virtual void ledOn() = 0;
     virtual void ledFlashing() = 0;
 
+    virtual void showShowerTotalTime() = 0;
     virtual void showShowerTime() = 0;
     virtual void showFinalCountdown() = 0;
     virtual void showLockoutTime() = 0;
