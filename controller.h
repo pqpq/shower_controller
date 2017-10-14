@@ -102,6 +102,7 @@ public:
             state = lockout;
             actions.ledOn();
             actions.valveClosed();
+            actions.lockoutTimerStart();
             actions.showLockoutTime();
             actions.displayFlash();
         }
