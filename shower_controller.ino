@@ -79,6 +79,14 @@ enum ShowOnDisplay
 
 ShowOnDisplay showOnDisplay = StoredShowerTimeMins;
 
+Countdown::Seconds timeToGo()
+{
+  const Timer::Milliseconds ms = showerTimer.remaining();
+  return ms / 1000UL;
+}
+
+Countdown countdown(timeToGo, fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
+
 class RealActions : public Actions
 {
     void valveClosed() override {}
@@ -101,9 +109,13 @@ class RealActions : public Actions
     void longBeep() override   { beep.longBeep(); }
     void rapidBeeps() override { beep.rapidBeeps(); }
 
-    void showTimerStart() override    { showTimer.start(showTime_sec * 1000, showTimerExpired); }
-    void showerTimerStart() override  { showerTimer.start(showerTime_mins * 60 * 1000, showerTimerExpired); }
-    void lockoutTimerStart() override { lockoutTimer.start(lockoutTime_mins * 60 * 1000, lockoutTimerExpired); }
+    void showTimerStart() override    { showTimer.start(showTime_sec * 1000UL, showTimerExpired); }
+    void showerTimerStart() override
+    {
+      showerTimer.start(showerTime_mins * 60 * 1000UL, showerTimerExpired);
+      countdown.start();
+    }
+    void lockoutTimerStart() override { lockoutTimer.start(lockoutTime_mins * 60 * 1000UL, lockoutTimerExpired); }
 
     void timeAdd() override
     {
@@ -125,14 +137,6 @@ class RealActions : public Actions
 RealActions actions;
 
 Controller controller(actions);
-
-Countdown::Seconds timeToGo()
-{
-  const Timer::Milliseconds ms = showerTimer.remaining();
-  return ms / 1000;
-}
-
-Countdown countdown(timeToGo, fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
 
 // shower timer callbacks -> countdown
 void showerFiveMinutesPassed()  { countdown.fiveMinutes(); }
@@ -169,10 +173,10 @@ void setup()
     showerTime_mins = minShowerTime_mins;
   }
 
-  showerTimer.every(5 * 60 * 1000, showerFiveMinutesPassed);
-  showerTimer.every(1 * 60 * 1000, showerOneMinutePassed);
-  showerTimer.every(     5 * 1000, showerFiveSecondsPassed);
-  showerTimer.every(     1 * 1000, showerOneSecondPassed);
+  showerTimer.every(5 * 60 * 1000UL, showerFiveMinutesPassed);
+  showerTimer.every(1 * 60 * 1000UL, showerOneMinutePassed);
+  showerTimer.every(     5 * 1000UL, showerFiveSecondsPassed);
+  showerTimer.every(     1 * 1000UL, showerOneSecondPassed);
 
   systemTimer.every(50, beepPoll);
   systemTimer.every(500, displayFlashPoll);
@@ -217,15 +221,13 @@ void loop()
     display.showNumber(showerTime_mins);
     break;
   case ShowerTimeMins:
-    //display.showNumber(showerTimer.remaining() / (60 * 1000));
-    display.showNumber(showerTimer.remaining() / 1000);
+    display.showNumber(showerTimer.remaining() / (60 * 1000));
     break;
   case ShowerTimeSecs:
     display.showNumber(showerTimer.remaining() / 1000);
     break;
   case LockoutTimeMins:
-    //display.showNumber(lockoutTimer.remaining() / (60 * 1000));
-    display.showNumber(lockoutTimer.remaining() / 1000);
+    display.showNumber(lockoutTimer.remaining() / (60 * 1000));
     break;
   }
 

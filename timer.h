@@ -14,7 +14,7 @@
 class Timer
 {
 public:
-    typedef unsigned int Milliseconds;
+    typedef unsigned long Milliseconds;
     typedef Milliseconds TimeFn(void);
     typedef void EventCallbackFn();
 
