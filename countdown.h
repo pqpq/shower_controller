@@ -1,82 +1,69 @@
+#pragma once
 
-/// Deals with the logic of time passing, as we count down the minutes and seconds.
-/// The various "time has passed" methods should be called at regular intervals,
-/// and this class decides whether they trigger callbacks.
+#include <iostream>
+using namespace std;
+
+/// Issue callbacks at critical times, as we count down passing time.
+///
+/// secondsToGo() should be called regularly, and this class decides whether the
+/// current time to go should trigger any callbacks.
 ///
 class Countdown
 {
 public:
     typedef unsigned int Seconds;
-    typedef Seconds TimeToGoFn();
     typedef void EventCallback();
 
-    Countdown(TimeToGoFn & timeToGo,
-            EventCallback & fiveMinutesCallback,
-            EventCallback & oneMinuteCallback,
+    Countdown(EventCallback & fiveMinutesCallback,
+            EventCallback & lastMinuteCallback,
             EventCallback & fiveSecondCallback,
             EventCallback & oneSecondCallback)
-    : timeToGo(timeToGo)
-    , fiveMinutesCallback(fiveMinutesCallback)
-    , lastTime5Mins(0)
-    , oneMinuteCallback(oneMinuteCallback)
-    , lastTime1Min(0)
+    : fiveMinutesCallback(fiveMinutesCallback)
+    , lastMinuteCallback(lastMinuteCallback)
     , fiveSecondsCallback(fiveSecondCallback)
     , oneSecondCallback(oneSecondCallback)
+    , previous(0)
     {}
 
-    void start()
+    void secondsToGo(Seconds s)
     {
-        const Seconds timeNow = timeToGo();
-        lastTime5Mins = timeNow;
-        lastTime1Min = timeNow;
-    }
+        //if (s > 1) s--;
 
-    void fiveMinutes()
-    {
-        const Seconds timeNow = timeToGo();
-        if (timeNow <= 300 && lastTime5Mins > 300)
+        cout << "prev=" << previous << " now=" << s;
+        cout << "(p-1)/300=" << (previous-1) / 300 << " (s-1)/300=" << (s-1) / 300;
+        cout << endl;
+        if (previous > 0)
         {
-            fiveMinutesCallback();
+            if ((previous-1) / 300 != (s-1) / 300)
+            {
+                fiveMinutesCallback();
+            }
+
+            if (previous > 60 && s <= 60)
+            {
+                lastMinuteCallback();
+            }
+
+            if (10 < s && s <= 55 && (previous-1) / 5 != (s-1) / 5)
+            {
+                fiveSecondsCallback();
+            }
+
+            if (s <= 10 && previous != s)
+            {
+                oneSecondCallback();
+            }
         }
 
-        lastTime5Mins = timeNow;
-    }
-
-    void oneMinute()
-    {
-        const Seconds timeNow = timeToGo();
-        if (timeNow <= 60 && lastTime1Min > 60)
-        {
-            oneMinuteCallback();
-        }
-
-        lastTime1Min = timeNow;
-    }
-
-    void fiveSeconds()
-    {
-        const Seconds timeNow = timeToGo();
-        if (10 < timeNow && timeNow < 60)
-        {
-            fiveSecondsCallback();
-        }
-    }
-
-    void oneSecond()
-    {
-        if (timeToGo() <= 10)
-        {
-            oneSecondCallback();
-        }
+        previous = s;
     }
 
 private:
 
-    TimeToGoFn & timeToGo;
     EventCallback & fiveMinutesCallback;
-    Seconds lastTime5Mins;
-    EventCallback & oneMinuteCallback;
-    Seconds lastTime1Min;
+    EventCallback & lastMinuteCallback;
     EventCallback & fiveSecondsCallback;
     EventCallback & oneSecondCallback;
+
+    Seconds previous;
 };
