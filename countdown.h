@@ -34,7 +34,7 @@ public:
     void fiveMinutes()
     {
         const Seconds timeNow = timeToGo();
-        if (timeNow < 300 && lastTime5Mins >= 300)
+        if (timeNow <= 300 && lastTime5Mins > 300)
         {
             fiveMinutesCallback();
         }
@@ -45,7 +45,7 @@ public:
     void oneMinute()
     {
         const Seconds timeNow = timeToGo();
-        if (timeNow < 60 && lastTime1Min >= 60)
+        if (timeNow <= 60 && lastTime1Min > 60)
         {
             oneMinuteCallback();
         }
@@ -55,7 +55,8 @@ public:
 
     void fiveSeconds()
     {
-        if (timeToGo() < 60)
+        const Seconds timeNow = timeToGo();
+        if (10 < timeNow && timeNow < 60)
         {
             fiveSecondsCallback();
         }
@@ -63,7 +64,7 @@ public:
 
     void oneSecond()
     {
-        if (timeToGo() < 10)
+        if (timeToGo() <= 10)
         {
             oneSecondCallback();
         }

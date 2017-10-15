@@ -36,7 +36,7 @@ void oneSecondCallback()
 void ignoreCallback() {}
 
 
-TEST_CASE("fiveMinutes triggers callback once when time to go passes 300 seconds")
+TEST_CASE("fiveMinutes triggers callback once when time to go reaches 300 seconds")
 {
     Countdown uut(testGetTimeToGo, fiveMinutesCallback, ignoreCallback, ignoreCallback, ignoreCallback);
 
@@ -47,11 +47,11 @@ TEST_CASE("fiveMinutes triggers callback once when time to go passes 300 seconds
     uut.fiveMinutes();
     REQUIRE(fiveMinutesCalls == 0);
 
-    testTimeToGo = 300;
+    testTimeToGo = 301;
     uut.fiveMinutes();
     REQUIRE(fiveMinutesCalls == 0);
 
-    testTimeToGo = 299;
+    testTimeToGo = 300;
     uut.fiveMinutes();
     REQUIRE(fiveMinutesCalls == 1);
 
@@ -72,11 +72,11 @@ TEST_CASE("oneMinute triggers callback once when time to go passes 60 seconds")
     uut.oneMinute();
     REQUIRE(oneMinuteCalls == 0);
 
-    testTimeToGo = 60;
+    testTimeToGo = 61;
     uut.oneMinute();
     REQUIRE(oneMinuteCalls == 0);
 
-    testTimeToGo = 59;
+    testTimeToGo = 60;
     uut.oneMinute();
     REQUIRE(oneMinuteCalls == 1);
 
@@ -86,7 +86,7 @@ TEST_CASE("oneMinute triggers callback once when time to go passes 60 seconds")
     REQUIRE(oneMinuteCalls == 0);
 }
 
-TEST_CASE("oneMinute and fiveMinutes called together triggers 5 minutes if time passes 300")
+TEST_CASE("oneMinute and fiveMinutes called together triggers 5 minutes if time reaches 300")
 {
     Countdown uut(testGetTimeToGo, fiveMinutesCallback, oneMinuteCallback, ignoreCallback, ignoreCallback);
 
@@ -96,7 +96,7 @@ TEST_CASE("oneMinute and fiveMinutes called together triggers 5 minutes if time 
     oneMinuteCalls = 0;
     fiveMinutesCalls = 0;
 
-    testTimeToGo = 299;
+    testTimeToGo = 300;
     uut.oneMinute();
     uut.fiveMinutes();
 
@@ -104,7 +104,7 @@ TEST_CASE("oneMinute and fiveMinutes called together triggers 5 minutes if time 
     REQUIRE(fiveMinutesCalls == 1);
 }
 
-TEST_CASE("fiveSeconds only triggers callbacks in last 60 seconds")
+TEST_CASE("fiveSeconds only triggers callbacks in last 60 - 11 seconds")
 {
     Countdown uut(testGetTimeToGo, ignoreCallback, ignoreCallback, fiveSecondCallback, ignoreCallback);
 
@@ -123,10 +123,31 @@ TEST_CASE("fiveSeconds only triggers callbacks in last 60 seconds")
     uut.fiveSeconds();
     REQUIRE(fiveSecondCalls == 1);
 
-    testTimeToGo = 10;
+    testTimeToGo = 14;
     fiveSecondCalls = 0;
     uut.fiveSeconds();
     REQUIRE(fiveSecondCalls == 1);
+
+    testTimeToGo = 10;
+    fiveSecondCalls = 0;
+    uut.fiveSeconds();
+    REQUIRE(fiveSecondCalls == 0);
+
+    testTimeToGo = 9;
+    uut.fiveSeconds();
+    REQUIRE(fiveSecondCalls == 0);
+
+    testTimeToGo = 5;
+    uut.fiveSeconds();
+    REQUIRE(fiveSecondCalls == 0);
+
+    testTimeToGo = 4;
+    uut.fiveSeconds();
+    REQUIRE(fiveSecondCalls == 0);
+
+    testTimeToGo = 0;
+    uut.fiveSeconds();
+    REQUIRE(fiveSecondCalls == 0);
 }
 
 TEST_CASE("oneSecond only triggers callbacks in last 10 seconds")
@@ -140,10 +161,15 @@ TEST_CASE("oneSecond only triggers callbacks in last 10 seconds")
     uut.oneSecond();
     REQUIRE(oneSecondCalls == 0);
 
-    testTimeToGo = 10;
+    testTimeToGo = 11;
     oneSecondCalls = 0;
     uut.oneSecond();
     REQUIRE(oneSecondCalls == 0);
+
+    testTimeToGo = 10;
+    oneSecondCalls = 0;
+    uut.oneSecond();
+    REQUIRE(oneSecondCalls == 1);
 
     testTimeToGo = 9;
     oneSecondCalls = 0;
