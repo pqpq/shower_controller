@@ -230,7 +230,7 @@ const TestVector stateTests[] =
         "Water on + 5 mins to go -> beep",
         { "startButton", "startButton" },
         { "fiveMinutesToGo" },
-        { "shortBeep" }
+        { "longBeep" }
     },
     {
         "Water on + 5 mins to go + 5 sec passed -> nothing",
@@ -248,7 +248,7 @@ const TestVector stateTests[] =
         "Water on + 1 min to go + 5 sec passed -> beep",
         { "startButton", "startButton", "oneMinuteToGo" },
         { "fiveSecondsPassed" },
-        { "shortBeep" }
+        { "longBeep" }
     },
     {
         "Water on, 1 min to go + 10 secs to go -> rapid beeps",
@@ -289,7 +289,7 @@ const TestVector stateTests[] =
 
     // Silent state
     {
-        "Silent + long start button -> Water on",
+        "Silent + start button -> Water on",
         { "startButton", "startButton", "startButton" },
         { "startButton" },
         { "longBeep" }
@@ -365,7 +365,7 @@ const TestVector stateTests[] =
 
     // Lockout state
     {
-        "Lockout + long start button -> error beeps",
+        "Lockout + start button -> error beeps",
         { "startButton", "startButton", "showerTimerExpired" },
         { "startButton" },
         { "rapidBeeps" }
@@ -407,7 +407,7 @@ const TestVector stateTests[] =
         { "timeSave", "rapidBeeps", "displayOff", "ledFlashing", "valveClosed" }
     },
     {
-        "Override + long start button -> error beep",
+        "Override + start button -> error beep",
         { "dongleIn" },
         { "startButton" },
         { "rapidBeeps" }
@@ -479,9 +479,9 @@ const TestVector useCaseTests[] =
         {
             "showTimerStart", "showShowerTotalTime", "displayOn", "shortBeep",
             "longBeep", "valveOpen", "showerTimerStart", "showShowerTime", "ledFlashing",
-            "shortBeep",
+            "longBeep",
             "showFinalCountdown", "displayPulse", "longBeep",
-            "shortBeep", "shortBeep", "shortBeep",
+            "longBeep", "longBeep", "longBeep",
             "rapidBeeps", "rapidBeeps", "rapidBeeps",
             "ledOn", "valveClosed", "lockoutTimerStart", "showLockoutTime", "displayFlash",
             "displayOff", "ledFlashing", "valveClosed"
@@ -507,9 +507,9 @@ const TestVector useCaseTests[] =
         {
             "showTimerStart", "showShowerTotalTime", "displayOn", "shortBeep",
             "longBeep", "valveOpen", "showerTimerStart", "showShowerTime", "ledFlashing",
-            "shortBeep",
+            "longBeep",
             "showFinalCountdown", "displayPulse", "longBeep",
-            "shortBeep", "shortBeep", "shortBeep",
+            "longBeep", "longBeep", "longBeep",
             "longBeep",
             "ledOn", "valveClosed", "lockoutTimerStart", "showLockoutTime", "displayFlash",
             "displayOff", "ledFlashing", "valveClosed"
@@ -534,7 +534,7 @@ const TestVector useCaseTests[] =
             "longBeep", "valveOpen", "showerTimerStart", "showShowerTime", "ledFlashing",
             // showering
             "showFinalCountdown", "displayPulse", "longBeep",
-            "shortBeep", "shortBeep", "shortBeep",
+            "longBeep", "longBeep", "longBeep",
             "rapidBeeps", "rapidBeeps", "rapidBeeps",
             "ledOn", "valveClosed", "lockoutTimerStart", "showLockoutTime", "displayFlash",
             "displayOff", "ledFlashing", "valveClosed"

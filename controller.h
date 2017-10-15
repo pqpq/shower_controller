@@ -120,7 +120,7 @@ public:
     {
         if (state == on && !silent)
         {
-            actions.shortBeep();
+            actions.longBeep();
         }
     }
 
@@ -142,7 +142,7 @@ public:
     {
         if (state == finalCountdown && !silent)
         {
-            actions.shortBeep();
+            actions.longBeep();
         }
     }
 
@@ -194,7 +194,4 @@ private:
         goToIdleNoBeep();
     }
 };
-
-
-
 
