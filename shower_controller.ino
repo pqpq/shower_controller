@@ -116,15 +116,7 @@ class RealActions : public Actions
     void rapidBeeps() override { beep.rapidBeeps(); }
 
     void showTimerStart() override    { showTimer.start(showTime_sec * 1000UL, showTimerExpired); }
-    void showerTimerStart() override
-    {
-      int seconds = showerTime_mins * 60;
-      // Show the total time in minutes, for a few seconds. Otherwise it immediately
-      // decrements to mins-1, and it looks like you haven't programmed the time correctly!
-      seconds += 10;
-      const Timer::Milliseconds ms = seconds * 1000UL;
-      showerTimer.start(ms, showerTimerExpired);
-    }
+    void showerTimerStart() override  { showerTimer.start(showerTime_mins * 60 * 1000UL, showerTimerExpired); }
     void lockoutTimerStart() override { lockoutTimer.start(lockoutTime_mins * 60 * 1000UL, lockoutTimerExpired); }
 
     void timeAdd() override
@@ -205,29 +197,24 @@ void updateDisplay()
     break;
 
   case ShowerTimeMins:
-    ms = showerTimer.remaining();
-    ms = ms / 1000;
-    ms = ms / 60;
-    n = (int)ms;
-    display.showNumber(n);
-    //display.showNumber(showerTimer.remaining() / (60 * 1000));
+    display.showNumber(1 + showerTimer.remaining() / (60 * 1000UL));
     break;
 
   case ShowerTimeSecs:
-    ms = showerTimer.remaining();
-    ms = ms / 1000;
-    n = (int)ms;
-    display.showNumber(n);
-    //display.showNumber(showerTimer.remaining() / 1000);
+//    ms = showerTimer.remaining();
+//    ms = ms / 1000;
+//    n = (int)ms;
+//    display.showNumber(n);
+    display.showNumber(1 + showerTimer.remaining() / 1000UL);
     break;
 
   case LockoutTimeMins:
-    ms = lockoutTimer.remaining();
-    ms = ms / 1000;
-    ms = ms / 60;
-    n = (int)ms;
-    display.showNumber(n);
-    //display.showNumber(lockoutTimer.remaining() / (60 * 1000));
+//    ms = lockoutTimer.remaining();
+//    ms = ms / 1000;
+//    ms = ms / 60;
+//    n = (int)ms;
+//    display.showNumber(n);
+    display.showNumber(1 + lockoutTimer.remaining() / (60 * 1000UL));
     break;
   }
 }
