@@ -1,8 +1,5 @@
 #pragma once
 
-#include <iostream>
-using namespace std;
-
 /// Issue callbacks at critical times, as we count down passing time.
 ///
 /// secondsToGo() should be called regularly, and this class decides whether the
@@ -27,11 +24,6 @@ public:
 
     void secondsToGo(Seconds s)
     {
-        //if (s > 1) s--;
-
-        cout << "prev=" << previous << " now=" << s;
-        cout << "(p-1)/300=" << (previous-1) / 300 << " (s-1)/300=" << (s-1) / 300;
-        cout << endl;
         if (previous > 0)
         {
             if ((previous-1) / 300 != (s-1) / 300)

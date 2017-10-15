@@ -82,14 +82,16 @@ enum ShowOnDisplay
 
 ShowOnDisplay showOnDisplay = StoredShowerTimeMins;
 
-Countdown::Seconds timeToGo()
+
+Countdown countdown(fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
+
+void updateCountdown()
 {
   const Timer::Milliseconds ms = showerTimer.remaining();
-  const unsigned long s = ms / 1000UL;
-  return s;
+  const unsigned long secondsToGo = ms / 1000UL;
+  countdown.secondsToGo(secondsToGo);
 }
 
-Countdown countdown(timeToGo, fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
 
 class RealActions : public Actions
 {
@@ -122,7 +124,6 @@ class RealActions : public Actions
       seconds += 10;
       const Timer::Milliseconds ms = seconds * 1000UL;
       showerTimer.start(ms, showerTimerExpired);
-      countdown.start();
     }
     void lockoutTimerStart() override { lockoutTimer.start(lockoutTime_mins * 60 * 1000UL, lockoutTimerExpired); }
 
@@ -146,12 +147,6 @@ class RealActions : public Actions
 RealActions actions;
 
 Controller controller(actions);
-
-// shower timer callbacks -> countdown
-void showerFiveMinutesPassed()  { countdown.fiveMinutes(); }
-void showerOneMinutePassed()    { countdown.oneMinute(); }
-void showerFiveSecondsPassed()  { countdown.fiveSeconds(); }
-void showerOneSecondPassed()    { countdown.oneSecond(); }
 
 // timer expiry callbacks -> controller
 void showTimerExpired()   { controller.showTimerExpired(); }
@@ -256,13 +251,9 @@ void setup()
     showerTime_mins = minShowerTime_mins;
   }
 
-  showerTimer.every(5 * 60 * 1000UL, showerFiveMinutesPassed);
-  showerTimer.every(1 * 60 * 1000UL, showerOneMinutePassed);
-  showerTimer.every(     5 * 1000UL, showerFiveSecondsPassed);
-  showerTimer.every(     1 * 1000UL, showerOneSecondPassed);
-
   systemTimer.every(50, beepPoll);
   systemTimer.every(500, displayFlashPoll);
+  systemTimer.every(1000, updateCountdown);
 }
 
 
