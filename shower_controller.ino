@@ -7,6 +7,9 @@
 
 #include <EEPROM.h>
 
+//------------------------------------------------------------------------------
+// Hardware
+
 #define SEG_A         (3)
 #define SEG_B         (4)
 #define SEG_C         (0)
@@ -29,6 +32,9 @@ const int sevenSegmentPins[8] = { SEG_A, SEG_B, SEG_C, SEG_D, SEG_E, SEG_F, SEG_
 
 #define EEPROM_ADDR   (0)
 
+
+//------------------------------------------------------------------------------
+// Times & configuration
 
 constexpr unsigned int maxShowerTime_mins = 30;
 constexpr unsigned int minShowerTime_mins = 2;//5;
@@ -54,6 +60,8 @@ constexpr unsigned int showTime_sec = 5;
 constexpr unsigned int lockoutTime_mins = 3;//30;
 
 
+//------------------------------------------------------------------------------
+// Buzzer
 
 void beepCallback(bool on)
 {
@@ -67,9 +75,13 @@ void beepPoll()
   beep.poll();
 }
 
-Timer::Milliseconds getTimeNow() 
+
+//------------------------------------------------------------------------------
+// Timers
+
+Timer::Milliseconds getTimeNow()
 {
-  return millis(); 
+  return millis();
 }
 
 Timer showTimer(getTimeNow);
@@ -77,6 +89,17 @@ Timer showerTimer(getTimeNow);
 Timer lockoutTimer(getTimeNow);
 Timer systemTimer(getTimeNow);
 
+void updateTimers()
+{
+  showTimer.update();
+  showerTimer.update();
+  lockoutTimer.update();
+  systemTimer.update();
+}
+
+
+//------------------------------------------------------------------------------
+// 7-segment display
 
 Display display(sevenSegmentPins, LATCH1_ENABLE, LATCH0_ENABLE, LEDS_OE);
 
@@ -119,16 +142,10 @@ void updateDisplay()
 }
 
 
-Countdown countdown(fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
+//------------------------------------------------------------------------------
+// Controller (state machine)
 
-void updateCountdown()
-{
-  const Timer::Milliseconds ms = showerTimer.remaining();
-  const unsigned long secondsToGo = ms / 1000UL;
-  countdown.secondsToGo(secondsToGo);
-}
-
-
+// Interface the Controller's abstract Actions to the real system.
 class RealActions : public Actions
 {
     void valveClosed() override { digitalWrite(RELAY, LOW);  digitalWrite(LED_BUILTIN, LOW);  }
@@ -173,12 +190,27 @@ void showTimerExpired()   { controller.showTimerExpired(); }
 void showerTimerExpired() { controller.showerTimerExpired(); }
 void lockoutTimerExpired(){ controller.lockoutTimerExpired(); }
 
-// countdown callbacks -> controller
+
+//------------------------------------------------------------------------------
+// Countdown
+
 void fiveMinutesToGo()    { controller.fiveMinutesToGo(); }
 void oneMinuteToGo()      { controller.oneMinuteToGo(); }
 void fiveSecondsPassed()  { controller.fiveSecondsPassed(); }
 void oneSecondPassed()    { controller.oneSecondPassed(); }
 
+Countdown countdown(fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
+
+void updateCountdown()
+{
+  const Timer::Milliseconds ms = showerTimer.remaining();
+  const unsigned long secondsToGo = ms / 1000UL;
+  countdown.secondsToGo(secondsToGo);
+}
+
+
+//------------------------------------------------------------------------------
+// Buttons (some are actually input switches)
 
 Button startButton(A0);
 Button plusButton(A1);
@@ -220,9 +252,13 @@ void checkButtons()
 }
 
 
+//------------------------------------------------------------------------------
+// Arduino stuff
+
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
+
   pinMode(RELAY, OUTPUT);
   digitalWrite(RELAY, LOW);
 
@@ -230,6 +266,7 @@ void setup()
 
   setShowerTime(EEPROM.read(EEPROM_ADDR));
 
+  // things that need to happen all the time
   systemTimer.every(50, beepPoll);
   systemTimer.every(500, displayFlashPoll);
   systemTimer.every(1000, updateCountdown);
@@ -239,13 +276,7 @@ void setup()
 void loop()
 {
   checkButtons();
-
-  showTimer.update();
-  showerTimer.update();
-  lockoutTimer.update();
-  systemTimer.update();
-
+  updateTimers();
   updateDisplay();
-
   delay(10);
 }
