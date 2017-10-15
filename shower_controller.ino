@@ -23,6 +23,8 @@ const int sevenSegmentPins[8] = { SEG_A, SEG_B, SEG_C, SEG_D, SEG_E, SEG_F, SEG_
 
 #define LEDS_OE       (11)
 
+#define RELAY         (12)
+
 #define BUZZER_PWM    (6)   // 980 Hz PWM output on this pin
 
 #define EEPROM_ADDR   (0)
@@ -31,6 +33,7 @@ Button startButton(A0);
 Button plusButton(A1);
 Button minusButton(A2);
 Button dongle(A3);
+Button reset(A4);
 
 constexpr unsigned int maxShowerTime_mins = 30;
 constexpr unsigned int minShowerTime_mins = 2;//5;
@@ -82,15 +85,16 @@ ShowOnDisplay showOnDisplay = StoredShowerTimeMins;
 Countdown::Seconds timeToGo()
 {
   const Timer::Milliseconds ms = showerTimer.remaining();
-  return ms / 1000UL;
+  const unsigned long s = ms / 1000UL;
+  return s;
 }
 
 Countdown countdown(timeToGo, fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
 
 class RealActions : public Actions
 {
-    void valveClosed() override {}
-    void valveOpen() override {}
+    void valveClosed() override { digitalWrite(RELAY, LOW);  digitalWrite(LED_BUILTIN, LOW);  }
+    void valveOpen() override   { digitalWrite(RELAY, HIGH); digitalWrite(LED_BUILTIN, HIGH); }
 
     void ledOn() override       { display.setDot(Display::DotOn); }
     void ledFlashing() override { display.setDot(Display::DotFlash); }
@@ -112,7 +116,12 @@ class RealActions : public Actions
     void showTimerStart() override    { showTimer.start(showTime_sec * 1000UL, showTimerExpired); }
     void showerTimerStart() override
     {
-      showerTimer.start(showerTime_mins * 60 * 1000UL, showerTimerExpired);
+      int seconds = showerTime_mins * 60;
+      // Show the total time in minutes, for a few seconds. Otherwise it immediately
+      // decrements to mins-1, and it looks like you haven't programmed the time correctly!
+      seconds += 10;
+      const Timer::Milliseconds ms = seconds * 1000UL;
+      showerTimer.start(ms, showerTimerExpired);
       countdown.start();
     }
     void lockoutTimerStart() override { lockoutTimer.start(lockoutTime_mins * 60 * 1000UL, lockoutTimerExpired); }
@@ -154,11 +163,85 @@ void fiveMinutesToGo()    { controller.fiveMinutesToGo(); }
 void oneMinuteToGo()      { controller.oneMinuteToGo(); }
 void fiveSecondsPassed()  { controller.fiveSecondsPassed(); }
 void oneSecondPassed()    { controller.oneSecondPassed(); }
-    
-  
+
+void checkButtons()
+{
+  if (startButton.check())
+  {
+    controller.startButton();
+  }
+
+  if (plusButton.check())
+  {
+    controller.plusButton();
+  }
+
+  if (minusButton.check())
+  {
+    controller.minusButton();
+  }
+
+  if (dongle.check())
+  {
+    controller.dongleIn();
+  }
+
+  if (dongle.released())
+  {
+    controller.dongleOut();
+  }
+
+  if (reset.check())
+  {
+    controller.reset();
+  }
+}
+
+void updateDisplay()
+{
+  Timer::Milliseconds ms;
+  int n;
+
+  switch (showOnDisplay)
+  {
+  default:
+  case StoredShowerTimeMins:
+    display.showNumber(showerTime_mins);
+    break;
+
+  case ShowerTimeMins:
+    ms = showerTimer.remaining();
+    ms = ms / 1000;
+    ms = ms / 60;
+    n = (int)ms;
+    display.showNumber(n);
+    //display.showNumber(showerTimer.remaining() / (60 * 1000));
+    break;
+
+  case ShowerTimeSecs:
+    ms = showerTimer.remaining();
+    ms = ms / 1000;
+    n = (int)ms;
+    display.showNumber(n);
+    //display.showNumber(showerTimer.remaining() / 1000);
+    break;
+
+  case LockoutTimeMins:
+    ms = lockoutTimer.remaining();
+    ms = ms / 1000;
+    ms = ms / 60;
+    n = (int)ms;
+    display.showNumber(n);
+    //display.showNumber(lockoutTimer.remaining() / (60 * 1000));
+    break;
+  }
+}
+
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(RELAY, OUTPUT);
+  digitalWrite(RELAY, LOW);
 
   display.setup();
 
@@ -185,51 +268,9 @@ void setup()
 
 void loop()
 {
-  const bool start = startButton.check();
-  const bool plus = plusButton.check();
-  const bool minus = minusButton.check();
-  const bool dongleIn = dongle.check();
-  const bool dongleOut = dongle.released();
+  checkButtons();
 
-  if (start)
-  {
-    controller.startButton();
-  }
-  if (plus)
-  {
-    controller.plusButton();
-  }
-  if (minus)
-  {
-    controller.minusButton();
-  }
-  if (dongleIn)
-  {
-    controller.dongleIn();
-  }
-  if (dongleOut)
-  {
-    controller.dongleOut();
-  }
-
-  /// @todo reset
-
-  switch (showOnDisplay)
-  {
-  default:
-  case StoredShowerTimeMins:
-    display.showNumber(showerTime_mins);
-    break;
-  case ShowerTimeMins:
-    display.showNumber(showerTimer.remaining() / (60 * 1000));
-    break;
-  case ShowerTimeSecs:
-    display.showNumber(showerTimer.remaining() / 1000);
-    break;
-  case LockoutTimeMins:
-    display.showNumber(lockoutTimer.remaining() / (60 * 1000));
-    break;
-  }
+  updateDisplay();
 
   showTimer.update();
   showerTimer.update();
