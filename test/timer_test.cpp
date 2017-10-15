@@ -188,3 +188,60 @@ TEST_CASE("Multiple callbacks are called correctly")
     REQUIRE(calls1 == 3);
     REQUIRE(calls2 == 2);
 }
+
+TEST_CASE("Synch resets all periods to current time")
+{
+    Timer uut(getTestTime);
+
+    const Timer::Milliseconds period1 = 3;
+    uut.every(period1, testCallback1);
+
+    const Timer::Milliseconds period2 = 4;
+    uut.every(period2, testCallback2);
+
+    testTime = 1;
+    uut.start(999, dummyCallback);
+
+    testTime++;
+    uut.update();
+    testTime++;
+    uut.update();
+    testTime++;
+    uut.update();
+    testTime++;
+    uut.update();
+    testTime++;
+    uut.update();
+    testTime++;
+    uut.update();
+    testTime++;
+    uut.update();
+
+    calls1 = 0;
+    calls2 = 0;
+    testTime++;
+    uut.synch();
+
+    REQUIRE(calls1 == 0);
+    REQUIRE(calls2 == 0);
+
+    testTime++;
+    uut.update();
+    REQUIRE(calls1 == 0);
+    REQUIRE(calls2 == 0);
+
+    testTime++;
+    uut.update();
+    REQUIRE(calls1 == 0);
+    REQUIRE(calls2 == 0);
+
+    testTime++;
+    uut.update();
+    REQUIRE(calls1 == 1);
+    REQUIRE(calls2 == 0);
+
+    testTime++;
+    uut.update();
+    REQUIRE(calls1 == 1);
+    REQUIRE(calls2 == 1);
+}

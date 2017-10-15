@@ -82,7 +82,6 @@ enum ShowOnDisplay
 
 ShowOnDisplay showOnDisplay = StoredShowerTimeMins;
 
-
 Countdown countdown(fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
 
 void updateCountdown()
@@ -116,8 +115,12 @@ class RealActions : public Actions
     void rapidBeeps() override { beep.rapidBeeps(); }
 
     void showTimerStart() override    { showTimer.start(showTime_sec * 1000UL, showTimerExpired); }
-    void showerTimerStart() override  { showerTimer.start(showerTime_mins * 60 * 1000UL, showerTimerExpired); }
     void lockoutTimerStart() override { lockoutTimer.start(lockoutTime_mins * 60 * 1000UL, lockoutTimerExpired); }
+    void showerTimerStart() override  
+    {
+      showerTimer.start(showerTime_mins * 60 * 1000UL, showerTimerExpired); 
+      systemTimer.synch();
+    }
 
     void timeAdd() override
     {
@@ -201,19 +204,10 @@ void updateDisplay()
     break;
 
   case ShowerTimeSecs:
-//    ms = showerTimer.remaining();
-//    ms = ms / 1000;
-//    n = (int)ms;
-//    display.showNumber(n);
-    display.showNumber(1 + showerTimer.remaining() / 1000UL);
+    display.showNumber(showerTimer.remaining() / 1000UL);
     break;
 
   case LockoutTimeMins:
-//    ms = lockoutTimer.remaining();
-//    ms = ms / 1000;
-//    ms = ms / 60;
-//    n = (int)ms;
-//    display.showNumber(n);
     display.showNumber(1 + lockoutTimer.remaining() / (60 * 1000UL));
     break;
   }

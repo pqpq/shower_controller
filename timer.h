@@ -48,6 +48,16 @@ public:
         }
     }
 
+    void synch()
+    {
+        const Milliseconds now = getTime();
+        lastUpdate = now;
+        for (size_t i = 0; i < nEvents; ++i)
+        {
+            events[i].reset();
+        }
+    }
+
 private:
 
     struct Event
@@ -77,6 +87,11 @@ private:
                     fn();
                 }
             }
+        }
+
+        void reset()
+        {
+            remaining = period;
         }
     };
 
