@@ -38,7 +38,7 @@ TEST_CASE("Calling poll on empty Beep does nothing")
     REQUIRE(testCalls == 0);
 }
 
-TEST_CASE("shortBeep turns on for 5 polls")
+TEST_CASE("shortBeep turns on for 3 polls")
 {
     Beep uut(testCallback);
 
@@ -58,12 +58,8 @@ TEST_CASE("shortBeep turns on for 5 polls")
     REQUIRE(testCalls == 0);
     uut.poll();
     REQUIRE(testCalls == 0);
-    uut.poll();
-    REQUIRE(testCalls == 0);
-    uut.poll();
-    REQUIRE(testCalls == 0);
 
-    // Off on 6th poll
+    // Off on 4th poll
     testClear();
     uut.poll();
     REQUIRE(testCalls == 1);
@@ -167,8 +163,6 @@ TEST_CASE("two short beeps are separated")
     testClear();
     uut.poll();
     uut.poll();
-    uut.poll();
-    uut.poll();
     REQUIRE(testCalls == 0);
 
     // Off on 4th poll
@@ -180,9 +174,6 @@ TEST_CASE("two short beeps are separated")
     // silent
     testClear();
     uut.poll();
-    uut.poll();
-    uut.poll();
-    uut.poll();
     REQUIRE(testCalls == 0);
 
     // on for second beep
@@ -192,8 +183,6 @@ TEST_CASE("two short beeps are separated")
     REQUIRE(testValue == true);
 
     testClear();
-    uut.poll();
-    uut.poll();
     uut.poll();
     uut.poll();
     REQUIRE(testCalls == 0);
@@ -234,9 +223,6 @@ TEST_CASE("Can add beeps indefinitely")
     uut.rapidBeeps();
 
     testClear();
-    uut.poll();
-    uut.poll();
-    uut.poll();
     uut.poll();
     REQUIRE(testCalls == 0);
 
@@ -288,9 +274,6 @@ TEST_CASE("Can add beeps indefinitely")
     REQUIRE(testCalls == 6);
     REQUIRE(testValue == false);
     uut.poll();
-    uut.poll();
-    uut.poll();
-    uut.poll();
 
     // and another
     uut.rapidBeeps();
@@ -332,15 +315,10 @@ TEST_CASE("With queue full, another beep is ignored")
     REQUIRE(testValue == true);
     uut.poll();
     uut.poll();
-    uut.poll();
-    uut.poll();
     REQUIRE(testCalls == 1);
     uut.poll();
     REQUIRE(testCalls == 2);
     REQUIRE(testValue == false);
-    uut.poll();
-    uut.poll();
-    uut.poll();
     uut.poll();
     REQUIRE(testCalls == 2);
 
@@ -351,15 +329,10 @@ TEST_CASE("With queue full, another beep is ignored")
     REQUIRE(testValue == true);
     uut.poll();
     uut.poll();
-    uut.poll();
-    uut.poll();
     REQUIRE(testCalls == 1);
     uut.poll();
     REQUIRE(testCalls == 2);
     REQUIRE(testValue == false);
-    uut.poll();
-    uut.poll();
-    uut.poll();
     uut.poll();
     REQUIRE(testCalls == 2);
 

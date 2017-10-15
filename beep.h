@@ -65,8 +65,8 @@ public:
     {
         if (spaceFor(2))
         {
-            addOn(5);
-            addOff(5);
+            addOn(3);
+            addOff(2);
         }
     }
 
@@ -75,7 +75,7 @@ public:
         if (spaceFor(2))
         {
             addOn(20);
-            addOff(5);
+            addOff(2);
         }
     }
 
@@ -88,7 +88,7 @@ public:
             addOn(1);
             addOff(1);
             addOn(1);
-            addOff(5);
+            addOff(2);
         }
     }
 
