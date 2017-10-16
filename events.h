@@ -47,11 +47,11 @@ public:
     /// Allow another shower if the start button is pressed.
     virtual void lockoutTimerExpired() = 0;
 
-    /// We're into the last 5 minutes of the shower timer. Warn the user.
-    virtual void fiveMinutesToGo() = 0;
+    /// Mark each minute, in the last 5 minutes of the shower timer. Warn the user.
+    virtual void oneMinutePassed() = 0;
 
     /// We're into the last minute of the shower timer. Warn the user.
-    virtual void oneMinuteToGo() = 0;
+    virtual void lastMinute() = 0;
 
     /// Five more seconds have passed.
     /// Depending on state we might want to beep or something.

@@ -194,12 +194,12 @@ void lockoutTimerExpired(){ controller.lockoutTimerExpired(); }
 //------------------------------------------------------------------------------
 // Countdown
 
-void fiveMinutesToGo()    { controller.fiveMinutesToGo(); }
-void oneMinuteToGo()      { controller.oneMinuteToGo(); }
+void oneMinutesPassed()   { controller.oneMinutePassed(); }
+void lastMinute()         { controller.lastMinute(); }
 void fiveSecondsPassed()  { controller.fiveSecondsPassed(); }
 void oneSecondPassed()    { controller.oneSecondPassed(); }
 
-Countdown countdown(fiveMinutesToGo, oneMinuteToGo, fiveSecondsPassed, oneSecondPassed);
+Countdown countdown(oneMinutesPassed, lastMinute, fiveSecondsPassed, oneSecondPassed);
 
 void updateCountdown()
 {

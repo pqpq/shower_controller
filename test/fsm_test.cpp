@@ -111,8 +111,8 @@ void apply(Controller& uut, std::string event)
     if (event == "showTimerExpired")    { uut.showTimerExpired(); return; }
     if (event == "showerTimerExpired")  { uut.showerTimerExpired(); return; }
     if (event == "lockoutTimerExpired") { uut.lockoutTimerExpired(); return; }
-    if (event == "fiveMinutesToGo")     { uut.fiveMinutesToGo(); return; }
-    if (event == "oneMinuteToGo")       { uut.oneMinuteToGo(); return; }
+    if (event == "oneMinutePassed")     { uut.oneMinutePassed(); return; }
+    if (event == "lastMinute")          { uut.lastMinute(); return; }
     if (event == "fiveSecondsPassed")   { uut.fiveSecondsPassed(); return; }
     if (event == "oneSecondPassed")     { uut.oneSecondPassed(); return; }
 
@@ -166,7 +166,7 @@ const TestVector stateTests[] =
         { },
         {
             "plusButton", "minusButton", "showTimerExpired", "showerTimerExpired",
-            "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
+            "lockoutTimerExpired", "oneMinutePassed", "lastMinute",
             "fiveSecondsPassed", "oneSecondPassed"
         },
         { }
@@ -202,7 +202,7 @@ const TestVector stateTests[] =
         { "startButton" },
         {
             "plusButton", "minusButton", "showerTimerExpired", "lockoutTimerExpired",
-            "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "oneSecondPassed"
+            "oneMinutePassed", "lastMinute", "fiveSecondsPassed", "oneSecondPassed"
         },
         { }
     },
@@ -229,42 +229,42 @@ const TestVector stateTests[] =
     {
         "Water on + 5 mins to go -> beep",
         { "startButton", "startButton" },
-        { "fiveMinutesToGo" },
+        { "oneMinutePassed" },
         { "longBeep" }
     },
     {
         "Water on + 5 mins to go + 5 sec passed -> nothing",
-        { "startButton", "startButton", "fiveMinutesToGo" },
+        { "startButton", "startButton", "oneMinutePassed" },
         { "fiveSecondsPassed" },
         { }
     },
     {
         "Water on + 1 min to go -> warnings",
         { "startButton", "startButton" },
-        { "oneMinuteToGo" },
+        { "lastMinute" },
         { "showFinalCountdown", "displayPulse", "longBeep" }
     },
     {
         "Water on + 1 min to go + 5 sec passed -> beep",
-        { "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "lastMinute" },
         { "fiveSecondsPassed" },
         { "longBeep" }
     },
     {
         "Water on, 1 min to go + 10 secs to go -> rapid beeps",
-        { "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "lastMinute" },
         { "oneSecondPassed" },
         { "rapidBeeps" }
     },
     {
         "Water on, 1 min to go + 9 secs to go -> rapid beeps",
-        { "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "lastMinute" },
         { "oneSecondPassed", "oneSecondPassed" },
         { "rapidBeeps", "rapidBeeps" }
     },
     {
         "Water on, 1 min to go + long start button -> Silent",
-        { "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "lastMinute" },
         { "startButton", "oneSecondPassed" },
         { "longBeep" }
     },
@@ -276,7 +276,7 @@ const TestVector stateTests[] =
     },
     {
         "Water on, usual sequence + timer expired -> Lockout",
-        { "startButton", "startButton", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "oneSecondPassed" },
+        { "startButton", "startButton", "oneMinutePassed", "lastMinute", "fiveSecondsPassed", "oneSecondPassed" },
         { "showerTimerExpired" },
         { "ledOn", "valveClosed", "lockoutTimerStart", "showLockoutTime", "displayFlash" }
     },
@@ -309,42 +309,42 @@ const TestVector stateTests[] =
     {
         "Silent + 5 mins to go -> no beep",
         { "startButton", "startButton", "startButton" },
-        { "fiveMinutesToGo" },
+        { "oneMinutePassed" },
         { }
     },
     {
         "Silent + 1 min to go -> no beep",
         { "startButton", "startButton", "startButton" },
-        { "oneMinuteToGo" },
+        { "lastMinute" },
         { "showFinalCountdown", "displayPulse" }
     },
     {
         "Silent, 1 min to go + long start button -> Water on",
-        { "startButton", "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "startButton", "lastMinute" },
         { "startButton" },
         { "longBeep" }
     },
     {
         "Silent, 1 min to go + 5 sec passed -> no beep",
-        { "startButton", "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "startButton", "lastMinute" },
         { "fiveSecondsPassed" },
         { }
     },
     {
         "Silent, 1 min to go + final 10 seconds -> no beep",
-        { "startButton", "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "startButton", "lastMinute" },
         { "oneSecondPassed" },
         { }
     },
     {
         "Silent, 1 min to go + final 9 seconds -> no beep",
-        { "startButton", "startButton", "startButton", "oneMinuteToGo" },
+        { "startButton", "startButton", "startButton", "lastMinute" },
         { "oneSecondPassed", "oneSecondPassed" },
         { }
     },
     {
         "Silent, usual sequence + timer expired -> Lockout",
-        { "startButton", "startButton", "startButton", "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed", "oneSecondPassed" },
+        { "startButton", "startButton", "startButton", "oneMinutePassed", "lastMinute", "fiveSecondsPassed", "oneSecondPassed" },
         { "showerTimerExpired" },
         { "ledOn", "valveClosed", "lockoutTimerStart", "showLockoutTime", "displayFlash" }
     },
@@ -356,7 +356,7 @@ const TestVector stateTests[] =
             "minusButton",
             "showTimerExpired",
             "lockoutTimerExpired",
-            "fiveMinutesToGo",
+            "oneMinutePassed",
             "fiveSecondsPassed",
             "oneSecondPassed"
         },
@@ -393,7 +393,7 @@ const TestVector stateTests[] =
         { "startButton", "startButton", "showerTimerExpired" },
         {
             "plusButton", "minusButton", "showTimerExpired", "showerTimerExpired",
-            "fiveMinutesToGo", "oneMinuteToGo", "fiveSecondsPassed",
+            "oneMinutePassed", "lastMinute", "fiveSecondsPassed",
             "oneSecondPassed"
         },
         { }
@@ -429,7 +429,7 @@ const TestVector stateTests[] =
         { "dongleIn" },
         {
             "reset", "showTimerExpired", "showerTimerExpired",
-            "lockoutTimerExpired", "fiveMinutesToGo", "oneMinuteToGo",
+            "lockoutTimerExpired", "oneMinutePassed", "lastMinute",
             "fiveSecondsPassed", "oneSecondPassed"
         },
         {  }
@@ -469,8 +469,8 @@ const TestVector useCaseTests[] =
             // start
             "startButton", "startButton",
             // time passes during shower
-            "fiveMinutesToGo",
-            "oneMinuteToGo",
+            "oneMinutePassed", "oneMinutePassed", "oneMinutePassed", "oneMinutePassed",
+            "lastMinute",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
             "oneSecondPassed", "oneSecondPassed", "oneSecondPassed",
             // end
@@ -479,7 +479,7 @@ const TestVector useCaseTests[] =
         {
             "showTimerStart", "showShowerTotalTime", "displayOn", "shortBeep",
             "longBeep", "valveOpen", "showerTimerStart", "showShowerTime", "ledFlashing",
-            "longBeep",
+            "longBeep", "longBeep", "longBeep", "longBeep",
             "showFinalCountdown", "displayPulse", "longBeep",
             "longBeep", "longBeep", "longBeep",
             "rapidBeeps", "rapidBeeps", "rapidBeeps",
@@ -494,8 +494,8 @@ const TestVector useCaseTests[] =
             // start
             "startButton", "startButton",
             // time passes during shower
-            "fiveMinutesToGo",
-            "oneMinuteToGo",
+            "oneMinutePassed",
+            "lastMinute",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
             "startButton",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
@@ -522,7 +522,7 @@ const TestVector useCaseTests[] =
             // start
             "startButton", "startButton",
             // time passes during shower
-            "oneMinuteToGo",
+            "lastMinute",
             "fiveSecondsPassed", "fiveSecondsPassed", "fiveSecondsPassed",
             "oneSecondPassed", "oneSecondPassed", "oneSecondPassed",
             // end

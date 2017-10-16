@@ -11,11 +11,11 @@ public:
     typedef unsigned int Seconds;
     typedef void EventCallback();
 
-    Countdown(EventCallback & fiveMinutesCallback,
+    Countdown(EventCallback & oneMinuteCallback,
             EventCallback & lastMinuteCallback,
             EventCallback & fiveSecondCallback,
             EventCallback & oneSecondCallback)
-    : fiveMinutesCallback(fiveMinutesCallback)
+    : oneMinuteCallback(oneMinuteCallback)
     , lastMinuteCallback(lastMinuteCallback)
     , fiveSecondsCallback(fiveSecondCallback)
     , oneSecondCallback(oneSecondCallback)
@@ -26,9 +26,9 @@ public:
     {
         if (previous > 0)
         {
-            if ((previous-1) / 300 != (s-1) / 300)
+            if (60 < s && s <= 300 && (previous-1) / 60 != (s-1) / 60)
             {
-                fiveMinutesCallback();
+                oneMinuteCallback();
             }
 
             if (previous > 60 && s <= 60)
@@ -52,7 +52,7 @@ public:
 
 private:
 
-    EventCallback & fiveMinutesCallback;
+    EventCallback & oneMinuteCallback;
     EventCallback & lastMinuteCallback;
     EventCallback & fiveSecondsCallback;
     EventCallback & oneSecondCallback;

@@ -116,7 +116,7 @@ public:
         }
     }
 
-    virtual void fiveMinutesToGo()
+    virtual void oneMinutePassed()
     {
         if (state == on && !silent)
         {
@@ -124,7 +124,7 @@ public:
         }
     }
 
-    virtual void oneMinuteToGo()
+    virtual void lastMinute()
     {
         if (state == on)
         {

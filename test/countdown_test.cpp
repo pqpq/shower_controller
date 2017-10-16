@@ -5,16 +5,16 @@
 #include "catch.hpp"
 
 
-size_t fiveMinutesCalls = 0;
-void fiveMinutesCallback()
-{
-    fiveMinutesCalls++;
-}
-
 size_t oneMinuteCalls = 0;
 void oneMinuteCallback()
 {
     oneMinuteCalls++;
+}
+
+size_t lastMinuteCalls = 0;
+void lastMinuteCallback()
+{
+    lastMinuteCalls++;
 }
 
 size_t fiveSecondCalls = 0;
@@ -33,82 +33,122 @@ void ignoreCallback() {}
 
 void clearAll()
 {
-    fiveMinutesCalls = 0;
     oneMinuteCalls = 0;
+    lastMinuteCalls = 0;
     fiveSecondCalls = 0;
     oneSecondCalls = 0;
 }
 
-TEST_CASE("fiveMinutes triggers callback once each time we pass 5 minus")
+TEST_CASE("One minute callback triggered for each minute from 5 mins to 1 min")
 {
-    Countdown uut(fiveMinutesCallback, oneMinuteCallback, fiveSecondCallback, oneSecondCallback);
+    Countdown uut(oneMinuteCallback, lastMinuteCallback, fiveSecondCallback, oneSecondCallback);
 
     clearAll();
     uut.secondsToGo(800);
 
-    REQUIRE(fiveMinutesCalls == 0);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
     REQUIRE(fiveSecondCalls == 0);
     REQUIRE(oneSecondCalls == 0);
 
     uut.secondsToGo(700);
 
-    REQUIRE(fiveMinutesCalls == 0);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
     REQUIRE(fiveSecondCalls == 0);
     REQUIRE(oneSecondCalls == 0);
 
-    // late - should have been at 600, but should still trigger callback
-    uut.secondsToGo(500);
-    REQUIRE(fiveMinutesCalls == 1);
-    REQUIRE(oneMinuteCalls == 0);
+    // late - should have been at 300, but should still trigger callback
+    uut.secondsToGo(290);
+    REQUIRE(oneMinuteCalls == 1);
+    REQUIRE(lastMinuteCalls == 0);
     REQUIRE(fiveSecondCalls == 0);
     REQUIRE(oneSecondCalls == 0);
 
     clearAll();
-    uut.secondsToGo(301);
-    REQUIRE(fiveMinutesCalls == 0);
+    uut.secondsToGo(241);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
     REQUIRE(fiveSecondCalls == 0);
     REQUIRE(oneSecondCalls == 0);
 
-    uut.secondsToGo(300);
-    REQUIRE(fiveMinutesCalls == 1);
+    uut.secondsToGo(240);
+    REQUIRE(oneMinuteCalls == 1);
+    REQUIRE(lastMinuteCalls == 0);
+    REQUIRE(fiveSecondCalls == 0);
+    REQUIRE(oneSecondCalls == 0);
+
+    clearAll();
+    uut.secondsToGo(190);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
+    REQUIRE(fiveSecondCalls == 0);
+    REQUIRE(oneSecondCalls == 0);
+
+    uut.secondsToGo(170); // a bit late
+    REQUIRE(oneMinuteCalls == 1);
+    REQUIRE(lastMinuteCalls == 0);
+    REQUIRE(fiveSecondCalls == 0);
+    REQUIRE(oneSecondCalls == 0);
+
+    clearAll();
+    uut.secondsToGo(121);
+    REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
+    REQUIRE(fiveSecondCalls == 0);
+    REQUIRE(oneSecondCalls == 0);
+
+    uut.secondsToGo(120);
+    REQUIRE(oneMinuteCalls == 1);
+    REQUIRE(lastMinuteCalls == 0);
+    REQUIRE(fiveSecondCalls == 0);
+    REQUIRE(oneSecondCalls == 0);
+
+    clearAll();
+    uut.secondsToGo(61);
+    REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
+    REQUIRE(fiveSecondCalls == 0);
+    REQUIRE(oneSecondCalls == 0);
+
+    uut.secondsToGo(60);
+    REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 1);
     REQUIRE(fiveSecondCalls == 0);
     REQUIRE(oneSecondCalls == 0);
 }
 
-TEST_CASE("oneMinute triggers callback only when time to go passes 60 seconds")
+TEST_CASE("last minute callback triggered only when time to go passes 60 seconds")
 {
-    Countdown uut(fiveMinutesCallback, oneMinuteCallback, ignoreCallback, ignoreCallback);
+    Countdown uut(oneMinuteCallback, lastMinuteCallback, ignoreCallback, ignoreCallback);
 
     clearAll();
     uut.secondsToGo(301);
-    REQUIRE(fiveMinutesCalls == 0);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
 
     uut.secondsToGo(300);
-    REQUIRE(fiveMinutesCalls == 1);
-    REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(oneMinuteCalls == 1);
+    REQUIRE(lastMinuteCalls == 0);
 
+    uut.secondsToGo(62);
     clearAll();
     uut.secondsToGo(61);
-    REQUIRE(fiveMinutesCalls == 0);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
 
     uut.secondsToGo(60);
-    REQUIRE(fiveMinutesCalls == 0);
-    REQUIRE(oneMinuteCalls == 1);
+    REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 1);
 
     clearAll();
     uut.secondsToGo(10);
-    REQUIRE(fiveMinutesCalls == 0);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
 
     uut.secondsToGo(1);
-    REQUIRE(fiveMinutesCalls == 0);
     REQUIRE(oneMinuteCalls == 0);
+    REQUIRE(lastMinuteCalls == 0);
 }
 
 TEST_CASE("fiveSeconds only triggers callbacks in last 55 - 11 seconds")
