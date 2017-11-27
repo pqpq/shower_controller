@@ -10,14 +10,14 @@
 //------------------------------------------------------------------------------
 // Hardware
 
-#define SEG_A         (3)
-#define SEG_B         (4)
-#define SEG_C         (0)
-#define SEG_D         (1)
-#define SEG_E         (7)
-#define SEG_F         (2)
-#define SEG_G         (5)
-#define SEG_DOT       (8)
+#define SEG_A         (7)
+#define SEG_B         (8)
+#define SEG_C         (1)
+#define SEG_D         (2)
+#define SEG_E         (3)
+#define SEG_F         (5)
+#define SEG_G         (4)
+#define SEG_DOT       (0)
 
 const int sevenSegmentPins[8] = { SEG_A, SEG_B, SEG_C, SEG_D, SEG_E, SEG_F, SEG_G, SEG_DOT };
 
@@ -113,7 +113,8 @@ enum ShowOnDisplay
   StoredShowerTimeMins,
   ShowerTimeMins,
   ShowerTimeSecs,
-  LockoutTimeMins
+  LockoutTimeMins,
+  Nothing
 };
 
 ShowOnDisplay showOnDisplay = StoredShowerTimeMins;
@@ -138,6 +139,10 @@ void updateDisplay()
   case LockoutTimeMins:
     display.showNumber(1 + lockoutTimer.remaining() / (60 * 1000UL));
     break;
+
+  case Nothing:
+    display.showNumber(100);
+    break;
   }
 }
 
@@ -159,7 +164,7 @@ class RealActions : public Actions
     void showFinalCountdown() override  { showOnDisplay = ShowerTimeSecs; }
     void showLockoutTime() override     { showOnDisplay = LockoutTimeMins; }
 
-    void displayOff() override   { display.setMode(Display::Off); }
+    void displayOff() override   { showOnDisplay = Nothing; display.setMode(Display::Dim); }
     void displayOn() override    { display.setMode(Display::Bright); }
     void displayFlash() override { display.setMode(Display::Flash); }
     void displayPulse() override { display.setMode(Display::Pulse); }

@@ -78,7 +78,7 @@ public:
     digitalWrite(selectDigit0, LOW);
     digitalWrite(selectDigit1, LOW);
 
-    setMode(Off);
+    setMode(Dim);
   }
 
   void showNumber(int n)

@@ -31,7 +31,7 @@ Seven segment decimal point LED to indicate unit is on, and shower can start.
 Reed switch to reset the unit using a magnet? Position this somewhere else? Will magnet work through tiles and plasterboard? This is a get out of jail free card, and also allows someone else to have a shower while the lockout is still active, if they have the magic touch.
 
 ### Back panel
-+ and - buttons to change time.
+'+' and '-' buttons to change time.
 
 5 pin DIN plug "dongle" with magic wiring to enable time change mode.
 
