@@ -24,9 +24,9 @@ const int sevenSegmentPins[8] = { SEG_A, SEG_B, SEG_C, SEG_D, SEG_E, SEG_F, SEG_
 #define LATCH0_ENABLE (9)   // Latch for units 7-seg
 #define LATCH1_ENABLE (10)  // Latch for tens 7-seg
 
-#define LEDS_OE       (11)  // Latch OE -> LED brightness if PWMed
+#define LEDS_OE       (12)  // Latch OE -> LED brightness if PWMed
 
-#define RELAY         (12)
+#define RELAY         (11)
 
 #define BUZZER_PWM    (6)   // 980 Hz PWM output on this pin
 
@@ -57,7 +57,7 @@ void setShowerTime(int mins)
 constexpr unsigned int showTime_sec = 5;
 
 // How long to lock out the shower after it has finished
-constexpr unsigned int lockoutTime_mins = 3;//30;
+constexpr unsigned int lockoutTime_mins = 15;
 
 
 //------------------------------------------------------------------------------
@@ -218,10 +218,10 @@ void updateCountdown()
 // Buttons (some are actually input switches)
 
 Button startButton(A0);
-Button plusButton(A1);
-Button minusButton(A2);
-Button dongle(A3);
-Button reset(A4);
+Button plusButton(A4);
+Button minusButton(A3);
+Button dongle(A2);
+Button reset(A1);
 
 void checkButtons()
 {
@@ -273,8 +273,8 @@ void setup()
 
   // things that need to happen all the time
   systemTimer.every(50, beepPoll);
-  systemTimer.every(500, displayFlashPoll);
   systemTimer.every(1000, updateCountdown);
+  systemTimer.every(500, displayFlashPoll);
 }
 
 
